@@ -19,7 +19,7 @@ export const content = {
   navigation: [
     { label: 'Services', href: '#services' },
     { label: 'How it works', href: '#process' },
-    { label: 'Packages', href: '#packages' },
+    { label: 'Album options', href: '#album-options' },
     { label: 'Journal', href: 'https://ultraaalbums.com/blogs/' },
     { label: 'Contact', href: '#contact' },
   ],
@@ -40,8 +40,8 @@ export const content = {
         sentence: 'Keep wedding photographs together in a printed album.',
         canvasAlt: 'An open wedding album with a garden ceremony photograph on each page.',
         pageImages: [
-          '/manus-storage/async-images/74zSDuZfO4E1hzvbgy1Knc/image-1.webp',
-          '/manus-storage/async-images/74zSDuZfO4E1hzvbgy1Knc/image-2.webp',
+          image('editing-01-after'),
+          image('editing-02-after'),
         ],
       },
       {
@@ -51,24 +51,19 @@ export const content = {
         sentence: 'Send client photographs online and review the design before printing.',
         canvasAlt: 'An open wedding album with a ceremony photograph and wedding details on its pages.',
         pageImages: [
-          '/manus-storage/async-images/74zSDuZfO4E1hzvbgy1Knc/image-2.webp',
-          '/manus-storage/async-images/74zSDuZfO4E1hzvbgy1Knc/image-3.webp',
+          image('editing-02-after'),
+          image('editing-03-after'),
         ],
       },
     ],
     fact: 'Made in Mumbai. Ships worldwide.',
-    fallbackImage: image('hero-album', 1400),
-    fallbackAlt: 'An open dark album with a printed wedding photograph on its pages.',
-    fallbackSrcset: [
-      `${image('hero-album', 640)} 640w`,
-      `${image('hero-album', 960)} 960w`,
-      `${image('hero-album', 1400)} 1400w`,
-    ].join(', '),
-    pagesForModel: [
-      '/manus-storage/async-images/74zSDuZfO4E1hzvbgy1Knc/image-1.webp',
-      '/manus-storage/async-images/74zSDuZfO4E1hzvbgy1Knc/image-2.webp',
-      '/manus-storage/async-images/74zSDuZfO4E1hzvbgy1Knc/image-3.webp',
-    ],
+    // Stills rendered from the same Three.js scene (closed = first frame, open = rest).
+    fallbackImage: image('album-closed', 1400),
+    fallbackAlt: 'A closed dark leather album with a stitched border on its cover.',
+    fallbackSrcset: [640, 960, 1400].map((w) => `${image('album-closed', w)} ${w}w`).join(', '),
+    openImage: image('album-open', 1400),
+    openAlt: 'An open leather album with a full-page wedding photograph on each side.',
+    openSrcset: [640, 960, 1400].map((w) => `${image('album-open', w)} ${w}w`).join(', '),
   },
   sections: {
     products: {
@@ -173,26 +168,29 @@ export const content = {
       editRange: 'Move the slider to compare before and after',
       before: 'Before',
       after: 'After',
+      // Each example is a real file pair. Until Ultraa supplies its own edits, the
+      // "after" files are generated stand-ins and each "before" is derived from its
+      // "after" (flattened, cooler, under-exposed). Replace both files per pair.
       examples: [
         {
-          id: 'garden', label: 'Garden walk',
-          image: image('editing-pair-01'),
+          id: 'tree', label: 'Under the tree',
+          before: image('editing-01-before'), after: image('editing-01-after'),
           alt: 'A fictional newlywed couple beneath a flowering tree in a garden.',
         },
         {
-          id: 'window', label: 'Window portrait',
-          image: image('editing-pair-02'),
+          id: 'window', label: 'By the window',
+          before: image('editing-02-before'), after: image('editing-02-after'),
           alt: 'A fictional bride holding flowers beside a tall window.',
         },
         {
-          id: 'courtyard', label: 'Garden portrait',
-          image: image('editing-pair-03'),
+          id: 'path', label: 'Garden path',
+          before: image('editing-03-before'), after: image('editing-03-after'),
           alt: 'A fictional newlywed couple walking along a garden path.',
         },
       ],
     },
     packages: {
-      id: 'packages',
+      id: 'album-options',
       title: 'Album options',
       introduction: 'Published sizes, covers and page choices by album format.',
       columns: ['Album format', 'Sizes', 'Covers', 'Pages'],
@@ -218,7 +216,7 @@ export const content = {
         {
           format: 'Photo Books',
           sizes: '6 × 8 in; 9 × 12 in; wedding books, 12 × 18 in; mini books, 5 × 5 in.',
-          covers: 'Photo-printed and laminated covers; finish choices listed below.',
+          covers: 'Photo-printed, laminated covers.',
           pages: 'Non-tearable paper; glossy, matt or feather-touch finish.',
         },
       ],
@@ -249,11 +247,13 @@ export const content = {
         form: 'Check the highlighted fields.',
       },
       submit: 'Start your album',
-      unconfigured: 'The form is not connected. Nothing will be sent. Use the phone or Messenger links above.',
+      emailTo: 'ultraaalbums@gmail.com',
+      emailSubject: 'Album enquiry from the website',
+      mailtoNote: 'Sending opens your email app with this message addressed to ultraaalbums@gmail.com.',
+      mailtoOpened: 'Your email app should now show the message. It is sent only when you press send there.',
       sending: 'Sending your enquiry…',
-      sent: 'Your enquiry was accepted by the configured form service.',
-      failed: 'We could not confirm receipt. Please try again, call or message Ultraa.',
-      invalidEndpoint: 'The form destination is invalid. Nothing was sent. Use the phone or Messenger links above.',
+      sent: 'Your enquiry was sent to Ultraa.',
+      failed: 'We could not confirm that your enquiry arrived. Your text is still here: try again, call or message Ultraa.',
     },
   },
   external: {

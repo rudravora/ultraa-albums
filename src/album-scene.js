@@ -1,308 +1,311 @@
-import * as THREE from 'three';
+import {
+  CanvasTexture,
+  Color,
+  DirectionalLight,
+  BufferGeometry,
+  Group,
+  LineDashedMaterial,
+  LineSegments,
+  HemisphereLight,
+  MathUtils,
+  Mesh,
+  MeshStandardMaterial,
+  NoToneMapping,
+  OrthographicCamera,
+  PCFSoftShadowMap,
+  PlaneGeometry,
+  RepeatWrapping,
+  SRGBColorSpace,
+  Scene,
+  ShadowMaterial,
+  TextureLoader,
+  Vector3,
+  WebGLRenderer,
+} from 'three';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+// The framing box (world units on the view plane). The CSS still image is rendered
+// at exactly this aspect and shown with object-fit: contain, so the still and the
+// live canvas line up at every stage size.
+export const FRAME = { width: 4.05, height: 2.4 };
+
+const BOARD = { width: 1.46, depth: 2.06, thickness: 0.05 };
+const BLOCK = { width: 1.4, depth: 1.98, thickness: 0.09 };
+const PAGE = { width: 1.38, depth: 1.96 };
+const HINGE_Y = BLOCK.thickness + BOARD.thickness / 2;
 
 function cssValue(name) {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 }
 
-function loadPhoto(loader, path) {
+function loadImage(loader, path) {
   return new Promise((resolve, reject) => {
-    loader.load(path, resolve, undefined, reject);
+    loader.load(path, (texture) => resolve(texture), undefined, reject);
   });
 }
 
+function canvas2d(width, height) {
+  const element = document.createElement('canvas');
+  element.width = width;
+  element.height = height;
+  const context = element.getContext('2d', { alpha: false });
+  if (!context) throw new Error('2D canvas unavailable');
+  return [element, context];
+}
+
+// A full-bleed print, cover-fitted to the page like a flush-mount spread.
 async function pageTexture(loader, path) {
-  const loadedPhoto = await loadPhoto(loader, path);
-  const photo = loadedPhoto.image;
-  const width = 768;
-  const height = 1100;
-  const page = document.createElement('canvas');
-  page.width = width;
-  page.height = height;
-  const context = page.getContext('2d', { alpha: false });
-  if (!context) throw new Error('The album page surface could not be drawn.');
-
+  const loaded = await loadImage(loader, path);
+  const photo = loaded.image;
+  const [page, context] = canvas2d(690, 980);
   context.fillStyle = cssValue('--page-paper');
-  context.fillRect(0, 0, width, height);
-
-  const maxWidth = width * 0.86;
-  const maxHeight = height * 0.54;
-  const scale = Math.min(maxWidth / photo.width, maxHeight / photo.height);
-  const photoWidth = photo.width * scale;
-  const photoHeight = photo.height * scale;
-  const x = (width - photoWidth) / 2;
-  const y = (height - photoHeight) / 2;
-
-  context.drawImage(photo, x, y, photoWidth, photoHeight);
-  context.strokeStyle = cssValue('--border');
-  context.lineWidth = 2;
-  context.strokeRect(x, y, photoWidth, photoHeight);
-  loadedPhoto.dispose();
-
-  const output = new THREE.CanvasTexture(page);
-  output.colorSpace = THREE.SRGBColorSpace;
-  output.anisotropy = 4;
-  return output;
+  context.fillRect(0, 0, page.width, page.height);
+  const scale = Math.max(page.width / photo.width, page.height / photo.height);
+  const width = photo.width * scale;
+  const height = photo.height * scale;
+  context.drawImage(photo, (page.width - width) / 2, (page.height - height) / 2, width, height);
+  loaded.dispose();
+  const texture = new CanvasTexture(page);
+  texture.colorSpace = SRGBColorSpace;
+  texture.anisotropy = 8;
+  return texture;
 }
 
-function dashedStitching(coverMesh) {
-  const left = -0.62;
-  const right = 0.62;
-  const near = -0.89;
-  const far = 0.89;
-  const top = 0.032;
-  const points = [
-    new THREE.Vector3(left, top, near), new THREE.Vector3(right, top, near),
-    new THREE.Vector3(right, top, near), new THREE.Vector3(right, top, far),
-    new THREE.Vector3(right, top, far), new THREE.Vector3(left, top, far),
-    new THREE.Vector3(left, top, far), new THREE.Vector3(left, top, near),
-  ];
-  const geometry = new THREE.BufferGeometry().setFromPoints(points);
-  const material = new THREE.LineDashedMaterial({
-    color: new THREE.Color(cssValue('--page-paper')),
-    dashSize: 0.025,
-    gapSize: 0.025,
-    scale: 1,
-    opacity: 0.68,
-    transparent: true,
-  });
-  const line = new THREE.LineSegments(geometry, material);
-  line.computeLineDistances();
-  coverMesh.add(line);
-  return line;
+// Fine horizontal lines for the stacked page edges.
+function pageEdgeTexture() {
+  const [edge, context] = canvas2d(8, 128);
+  context.fillStyle = cssValue('--page-paper');
+  context.fillRect(0, 0, 8, 128);
+  context.fillStyle = cssValue('--page-edge');
+  for (let y = 0; y < 128; y += 4) context.fillRect(0, y, 8, 1);
+  const texture = new CanvasTexture(edge);
+  texture.colorSpace = SRGBColorSpace;
+  texture.wrapS = RepeatWrapping;
+  texture.wrapT = RepeatWrapping;
+  return texture;
 }
 
-function bezierProgress(value) {
-  const x1 = 0.4;
-  const y1 = 0;
-  const x2 = 0.2;
-  const y2 = 1;
-  const cubic = (t, a, b) => 3 * (1 - t) ** 2 * t * a + 3 * (1 - t) * t ** 2 * b + t ** 3;
-  const derivative = (t, a, b) => 3 * (1 - t) ** 2 * a + 6 * (1 - t) * t * (b - a) + 3 * t ** 2 * (1 - b);
-  let parameter = value;
-  for (let iteration = 0; iteration < 5; iteration += 1) {
-    const error = cubic(parameter, x1, x2) - value;
-    const slope = derivative(parameter, x1, x2);
-    if (Math.abs(slope) < 1e-5) break;
-    parameter -= error / slope;
-    parameter = THREE.MathUtils.clamp(parameter, 0, 1);
+// Low-amplitude noise used as a bump map, so the leather catches light unevenly.
+function leatherBump() {
+  const [bump, context] = canvas2d(256, 256);
+  const pixels = context.createImageData(256, 256);
+  let seed = 7;
+  for (let index = 0; index < pixels.data.length; index += 4) {
+    seed = (seed * 16807) % 2147483647;
+    const value = 118 + (seed % 20);
+    pixels.data[index] = value;
+    pixels.data[index + 1] = value;
+    pixels.data[index + 2] = value;
+    pixels.data[index + 3] = 255;
   }
-  return cubic(parameter, y1, y2);
+  context.putImageData(pixels, 0, 0);
+  const texture = new CanvasTexture(bump);
+  texture.wrapS = RepeatWrapping;
+  texture.wrapT = RepeatWrapping;
+  texture.repeat.set(3, 4);
+  return texture;
+}
+
+// Premium easing, cubic-bezier(0.4, 0, 0.2, 1), solved for x.
+function ease(value) {
+  const cubic = (t, a, b) => 3 * (1 - t) ** 2 * t * a + 3 * (1 - t) * t ** 2 * b + t ** 3;
+  const slope = (t, a, b) => 3 * (1 - t) ** 2 * a + 6 * (1 - t) * t * (b - a) + 3 * t ** 2 * (1 - b);
+  let t = value;
+  for (let step = 0; step < 6; step += 1) {
+    const d = slope(t, 0.4, 0.2);
+    if (Math.abs(d) < 1e-6) break;
+    t = MathUtils.clamp(t - (cubic(t, 0.4, 0.2) - value) / d, 0, 1);
+  }
+  return cubic(t, 0, 1);
+}
+
+// A stitched border inset from the cover edge, on the cover's outer face.
+function coverStitching(y) {
+  const inset = 0.09;
+  const x0 = -BOARD.width + inset;
+  const x1 = -inset - 0.06;
+  const z0 = -BOARD.depth / 2 + inset;
+  const z1 = BOARD.depth / 2 - inset;
+  const corners = [[x0, z0], [x1, z0], [x1, z1], [x0, z1]].map(([x, z]) => new Vector3(x, y, z));
+  const points = corners.flatMap((point, index) => [point, corners[(index + 1) % 4]]);
+  const line = new LineSegments(
+    new BufferGeometry().setFromPoints(points),
+    new LineDashedMaterial({ color: new Color(cssValue('--page-edge')), dashSize: 0.022, gapSize: 0.018, transparent: true, opacity: 0.55 }),
+  );
+  line.computeLineDistances();
+  return line;
 }
 
 export async function openAlbumScene(canvas, initialImages, { reducedMotion = false, onReady = () => {} } = {}) {
   const stage = canvas.parentElement;
-  const root = document.documentElement;
-  const paper = new THREE.Color(cssValue('--paper'));
-  const coverColour = new THREE.Color(cssValue('--cover-leather'));
-  const pageColour = new THREE.Color(cssValue('--page-paper'));
-  const loader = new THREE.TextureLoader();
-  const photos = await Promise.all(initialImages.map((path) => pageTexture(loader, path)));
+  const loader = new TextureLoader();
+  const [leftPhoto, rightPhoto] = await Promise.all(initialImages.map((path) => pageTexture(loader, path)));
 
-  const renderer = new THREE.WebGLRenderer({
-    canvas,
-    antialias: true,
-    alpha: false,
-    powerPreference: 'low-power',
-  });
-  renderer.setClearColor(paper, 1);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.6));
-  renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1;
+  const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'low-power' });
+  renderer.setClearColor(0x000000, 0);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.outputColorSpace = SRGBColorSpace;
+  renderer.toneMapping = NoToneMapping;
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.type = PCFSoftShadowMap;
 
-  const scene = new THREE.Scene();
-  scene.background = paper;
-  const camera = new THREE.OrthographicCamera(-2, 2, 1, -1, 0.1, 80);
-  camera.position.set(0, 4.5, 3.9);
-  camera.lookAt(0, 0.04, 0);
+  const scene = new Scene();
+  const camera = new OrthographicCamera(-1, 1, 1, -1, 0.1, 40);
+  camera.position.set(0.2, 7, 3.2);
+  camera.lookAt(0, 0.12, 0.02);
 
-  const ambient = new THREE.AmbientLight(new THREE.Color(cssValue('--surface')), 1.4);
-  scene.add(ambient);
-  const keyLight = new THREE.DirectionalLight(new THREE.Color(cssValue('--surface')), 3.2);
-  keyLight.position.set(-3, 6, 4);
-  keyLight.castShadow = true;
-  keyLight.shadow.mapSize.set(1024, 1024);
-  keyLight.shadow.camera.left = -4;
-  keyLight.shadow.camera.right = 4;
-  keyLight.shadow.camera.top = 4;
-  keyLight.shadow.camera.bottom = -4;
-  keyLight.shadow.bias = -0.0002;
-  keyLight.shadow.radius = 6;
-  scene.add(keyLight);
+  scene.add(new HemisphereLight(new Color(cssValue('--surface')), new Color(cssValue('--border')), 2.1));
+  const key = new DirectionalLight(new Color(cssValue('--surface')), 2.4);
+  key.position.set(-2.6, 6.5, 2.2);
+  key.castShadow = true;
+  key.shadow.mapSize.set(2048, 2048);
+  Object.assign(key.shadow.camera, { left: -3, right: 3, top: 3, bottom: -3, near: 1, far: 14 });
+  key.shadow.bias = -0.0004;
+  key.shadow.normalBias = 0.01;
+  scene.add(key);
 
-  const ground = new THREE.Mesh(
-    new THREE.PlaneGeometry(100, 100),
-    new THREE.MeshStandardMaterial({ color: paper, roughness: 1, metalness: 0 }),
-  );
+  const ground = new Mesh(new PlaneGeometry(30, 30), new ShadowMaterial({ opacity: 0.14 }));
   ground.rotation.x = -Math.PI / 2;
-  ground.position.y = -0.18;
   ground.receiveShadow = true;
   scene.add(ground);
 
-  const album = new THREE.Group();
-  album.rotation.y = -0.08;
+  const bump = leatherBump();
+  const edges = pageEdgeTexture();
+  const leather = new MeshStandardMaterial({
+    color: new Color(cssValue('--cover-leather')), roughness: 0.78, metalness: 0, bumpMap: bump, bumpScale: 0.6,
+  });
+  const paper = new MeshStandardMaterial({ color: new Color(cssValue('--page-paper')), roughness: 0.95 });
+  const edge = new MeshStandardMaterial({ color: new Color(cssValue('--surface')), map: edges, roughness: 0.95 });
+  // BoxGeometry material order: +x, -x, +y, -y, +z, -z.
+  const blockMaterials = [edge, edge, paper, paper, edge, edge];
+  const printMaterial = (map) => new MeshStandardMaterial({ map, roughness: 0.6, metalness: 0 });
+
+  const boardGeometry = new RoundedBoxGeometry(BOARD.width, BOARD.thickness, BOARD.depth, 3, 0.018);
+  const blockGeometry = new RoundedBoxGeometry(BLOCK.width, BLOCK.thickness, BLOCK.depth, 2, 0.006);
+  const pageGeometry = new PlaneGeometry(PAGE.width, PAGE.depth);
+  const spineHeight = (BLOCK.thickness + BOARD.thickness) * 2;
+  const spineGeometry = new RoundedBoxGeometry(0.12, spineHeight, BOARD.depth, 3, 0.04);
+  spineGeometry.translate(0, spineHeight / 2, 0);
+
+  const shade = (mesh) => { mesh.castShadow = true; mesh.receiveShadow = true; return mesh; };
+
+  const album = new Group();
+  album.rotation.y = -0.1;
   scene.add(album);
 
-  const coverMaterial = new THREE.MeshStandardMaterial({ color: coverColour, roughness: 0.9, metalness: 0.02 });
-  const edgeMaterial = new THREE.MeshStandardMaterial({ color: pageColour, roughness: 0.95 });
-  const coverGeometry = new THREE.BoxGeometry(1.42, 0.06, 2.02);
-  const pageBlockGeometry = new THREE.BoxGeometry(1.32, 0.105, 1.91);
-  const leftBoard = new THREE.Mesh(coverGeometry, coverMaterial);
-  leftBoard.position.set(-0.71, -0.085, 0);
-  leftBoard.castShadow = true;
-  leftBoard.receiveShadow = true;
-  const rightBoard = new THREE.Mesh(coverGeometry, coverMaterial);
-  rightBoard.position.set(0.71, -0.085, 0);
-  rightBoard.castShadow = true;
-  rightBoard.receiveShadow = true;
-  album.add(leftBoard, rightBoard);
-
-  const leftPages = new THREE.Mesh(pageBlockGeometry, edgeMaterial);
-  leftPages.position.set(-0.68, -0.005, 0);
-  leftPages.castShadow = true;
-  const rightPages = new THREE.Mesh(pageBlockGeometry, edgeMaterial);
-  rightPages.position.set(0.68, -0.005, 0);
-  rightPages.castShadow = true;
-  album.add(leftPages, rightPages);
-
-  const pageMaterials = photos.map((map) => new THREE.MeshStandardMaterial({
-    color: new THREE.Color(cssValue('--surface')),
-    map,
-    roughness: 0.93,
-    metalness: 0,
-  }));
-  const pageGeometry = new THREE.PlaneGeometry(1.24, 1.79);
-  const leftPageGroup = new THREE.Group();
-  const rightPageGroup = new THREE.Group();
-  leftPageGroup.position.set(0, 0.061, 0);
-  rightPageGroup.position.set(0, 0.061, 0);
-  leftPageGroup.rotation.z = -0.034;
-  rightPageGroup.rotation.z = 0.034;
-  const leftPage = new THREE.Mesh(pageGeometry, pageMaterials[0]);
-  leftPage.position.x = -0.68;
-  leftPage.rotation.x = -Math.PI / 2;
-  leftPage.receiveShadow = true;
-  const rightPage = new THREE.Mesh(pageGeometry, pageMaterials[1]);
-  rightPage.position.x = 0.68;
+  // Back half: rests on the table, never moves.
+  const backBoard = shade(new Mesh(boardGeometry, leather));
+  backBoard.position.set(BOARD.width / 2, BOARD.thickness / 2, 0);
+  const backBlock = shade(new Mesh(blockGeometry, blockMaterials));
+  backBlock.position.set(BLOCK.width / 2 + 0.02, BOARD.thickness + BLOCK.thickness / 2, 0);
+  // The top right-hand leaf is hinged at the spine so it can lift as the cover passes.
+  const rightLeaf = new Group();
+  rightLeaf.position.y = BOARD.thickness + BLOCK.thickness + 0.001;
+  const rightPage = shade(new Mesh(pageGeometry, printMaterial(rightPhoto)));
   rightPage.rotation.x = -Math.PI / 2;
-  rightPage.receiveShadow = true;
-  leftPageGroup.add(leftPage);
-  rightPageGroup.add(rightPage);
-  album.add(leftPageGroup, rightPageGroup);
+  rightPage.position.set(PAGE.width / 2 + 0.03, 0, 0);
+  rightLeaf.add(rightPage);
+  const spine = shade(new Mesh(spineGeometry, leather));
+  spine.position.set(0, 0, 0);
+  album.add(backBoard, backBlock, rightLeaf, spine);
 
-  const spine = new THREE.Mesh(
-    new THREE.BoxGeometry(0.075, 0.13, 1.96),
-    coverMaterial,
-  );
-  spine.position.set(0, -0.005, 0);
-  spine.castShadow = true;
-  album.add(spine);
+  // Front half: hinged at the spine. rotation.z = -PI is closed (lying on the back
+  // half, cover up); 0 is open (lying flat to the left).
+  const front = new Group();
+  front.position.y = HINGE_Y;
+  const frontBoard = shade(new Mesh(boardGeometry, leather));
+  frontBoard.position.set(-BOARD.width / 2, BOARD.thickness / 2 - HINGE_Y, 0);
+  const frontBlock = shade(new Mesh(blockGeometry, blockMaterials));
+  frontBlock.position.set(-BLOCK.width / 2 - 0.02, BOARD.thickness + BLOCK.thickness / 2 - HINGE_Y, 0);
+  const leftPage = shade(new Mesh(pageGeometry, printMaterial(leftPhoto)));
+  leftPage.rotation.x = -Math.PI / 2;
+  leftPage.position.set(-PAGE.width / 2 - 0.03, BOARD.thickness + BLOCK.thickness + 0.001 - HINGE_Y, 0);
+  front.add(frontBoard, frontBlock, leftPage, coverStitching(-HINGE_Y - 0.002));
+  album.add(front);
 
-  const lid = new THREE.Group();
-  lid.position.set(0, 0.095, 0);
-  lid.rotation.z = 0;
-  const coverMesh = new THREE.Mesh(coverGeometry, coverMaterial);
-  coverMesh.position.x = 0.71;
-  coverMesh.castShadow = true;
-  coverMesh.receiveShadow = true;
-  dashedStitching(coverMesh);
-  lid.add(coverMesh);
-  album.add(lid);
-
-  const cameraFit = () => {
-    const bounds = stage.getBoundingClientRect();
-    const width = Math.max(1, bounds.width);
-    const height = Math.max(1, bounds.height);
-    const aspect = width / height;
-    const viewHeight = aspect > 1.7 ? 4.6 / aspect : 3.1;
+  // Fit the FRAME box inside the stage (contain), matching the still image.
+  const fit = () => {
+    const { width, height } = stage.getBoundingClientRect();
+    const aspect = Math.max(1, width) / Math.max(1, height);
+    const frameAspect = FRAME.width / FRAME.height;
+    const viewHeight = aspect > frameAspect ? FRAME.height : FRAME.width / aspect;
     const viewWidth = viewHeight * aspect;
-    camera.left = -viewWidth / 2;
-    camera.right = viewWidth / 2;
-    camera.top = viewHeight / 2;
-    camera.bottom = -viewHeight / 2;
+    Object.assign(camera, { left: -viewWidth / 2, right: viewWidth / 2, top: viewHeight / 2, bottom: -viewHeight / 2 });
     camera.updateProjectionMatrix();
-    renderer.setSize(width, height, false);
+    renderer.setSize(Math.max(1, width), Math.max(1, height), false);
     renderer.render(scene, camera);
   };
 
-  cameraFit();
-  const resizeObserver = new ResizeObserver(cameraFit);
+  const pose = (progress, settle) => {
+    front.rotation.z = -Math.PI * (1 - progress);
+    // Closed, the book sits centred; it slides by half a board as it opens so the
+    // open spread ends centred too. The spine drops below the page line when open.
+    album.position.x = -(BOARD.width / 2) * (1 - progress);
+    spine.scale.y = MathUtils.lerp(1, 0.4, progress);
+    // The top right-hand leaf lifts slightly as the cover passes, then settles flat.
+    rightLeaf.rotation.z = 0.07 * Math.sin(settle * Math.PI);
+  };
+
+  fit();
+  const resizeObserver = new ResizeObserver(fit);
   resizeObserver.observe(stage);
 
-  function replacePage(mesh, oldMaterial, texture) {
-    const material = new THREE.MeshStandardMaterial({
-      color: new THREE.Color(cssValue('--surface')),
-      map: texture,
-      roughness: 0.93,
-      metalness: 0,
-    });
-    mesh.material = material;
-    oldMaterial.dispose();
-  }
-
+  let frame = 0;
   const controller = {
     async setPageImages(paths) {
       try {
-        const replacements = await Promise.all(paths.map((path) => pageTexture(loader, path)));
-        replacePage(leftPage, leftPage.material, replacements[0]);
-        replacePage(rightPage, rightPage.material, replacements[1]);
+        const [left, right] = await Promise.all(paths.map((path) => pageTexture(loader, path)));
+        for (const [mesh, map] of [[leftPage, left], [rightPage, right]]) {
+          const old = mesh.material;
+          mesh.material = printMaterial(map);
+          old.map?.dispose();
+          old.dispose();
+        }
         renderer.render(scene, camera);
       } catch {
-        // Keep the currently rendered spread if an optional audience image cannot load.
+        // Keep the spread already on screen if an optional image fails to load.
       }
     },
     dispose() {
+      cancelAnimationFrame(frame);
       resizeObserver.disconnect();
-      for (const texture of photos) texture.dispose();
-      for (const material of pageMaterials) material.dispose();
-      for (const material of [coverMaterial, edgeMaterial]) material.dispose();
-      pageGeometry.dispose();
-      pageBlockGeometry.dispose();
-      coverGeometry.dispose();
-      ground.geometry.dispose();
-      ground.material.dispose();
+      scene.traverse((object) => {
+        object.geometry?.dispose();
+        for (const material of [].concat(object.material ?? [])) {
+          material.map?.dispose();
+          material.dispose();
+        }
+      });
+      bump.dispose();
       renderer.dispose();
     },
   };
 
   if (reducedMotion) {
-    lid.rotation.z = Math.PI;
-    lid.position.y = -0.105;
-    leftPageGroup.rotation.z = 0;
-    rightPageGroup.rotation.z = 0;
+    pose(1, 0);
     renderer.render(scene, camera);
     onReady();
     return controller;
   }
 
-  lid.rotation.z = 0;
-  lid.position.y = 0.095;
-  const start = performance.now();
-  const duration = 600;
-  const renderOpening = (now) => {
-    const linear = THREE.MathUtils.clamp((now - start) / duration, 0, 1);
-    const progress = bezierProgress(linear);
-    lid.rotation.z = Math.PI * progress;
-    lid.position.y = 0.095 - 0.2 * progress + Math.sin(progress * Math.PI) * 0.24;
-    const fan = 1 - Math.min(linear / 0.4, 1);
-    leftPageGroup.rotation.z = -0.034 * fan;
-    rightPageGroup.rotation.z = 0.034 * fan;
-    renderer.render(scene, camera);
-    if (linear < 1) {
-      requestAnimationFrame(renderOpening);
-    } else {
-      lid.rotation.z = Math.PI;
-      lid.position.y = -0.105;
-      leftPageGroup.rotation.z = 0;
-      rightPageGroup.rotation.z = 0;
-      renderer.render(scene, camera);
-    }
-  };
-
+  // One 900 ms opening (Premium "dramatic reveal": 600-1200 ms), run once.
+  // The page settle trails the cover by 120 ms of follow-through.
+  pose(0, 0);
   renderer.render(scene, camera);
   onReady();
-  requestAnimationFrame(renderOpening);
+  const duration = 900;
+  const lag = 120;
+  const delay = 350;
+  const start = performance.now() + delay;
+  const tick = (now) => {
+    const elapsed = now - start;
+    const progress = ease(MathUtils.clamp(elapsed / duration, 0, 1));
+    const settle = MathUtils.clamp((elapsed - lag) / duration, 0, 1);
+    pose(progress, ease(settle));
+    renderer.render(scene, camera);
+    if (elapsed < duration + lag) frame = requestAnimationFrame(tick);
+    else { pose(1, 0); renderer.render(scene, camera); }
+  };
+  frame = requestAnimationFrame(tick);
   return controller;
 }
