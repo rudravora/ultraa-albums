@@ -114,8 +114,10 @@ function linkList(items) {
 
 const endpointValue = await loadPublicEndpoint();
 const endpoint = safeEndpoint(endpointValue);
-const endpointInvalid = Boolean(endpointValue && !endpoint);
-const contactMessage = endpointInvalid ? c.sections.contact.invalidEndpoint : (!endpoint ? c.sections.contact.unconfigured : '');
+if (endpointValue && !endpoint) console.warn('VITE_ULTRAA_FORM_ENDPOINT is not an http(s) URL; the form falls back to email.');
+// Without an endpoint the form still works: a native mailto: action opens the
+// visitor's email app (JS replaces this with a cleaner prefilled message).
+const mailto = `mailto:${c.sections.contact.emailTo}?subject=${encodeURIComponent(c.sections.contact.emailSubject)}`;
 
 const h = `<!doctype html>
 <html lang="en" data-type="product" data-radius="soft" data-buttons="solid" data-motion="premium">
@@ -131,17 +133,10 @@ const h = `<!doctype html>
   <link rel="icon" type="image/png" href="${html(c.brand.logo)}">
   <link rel="preload" href="/assets/fonts/display.woff2" as="font" type="font/woff2" crossorigin="anonymous">
   <link rel="preload" href="/assets/fonts/sans.woff2" as="font" type="font/woff2" crossorigin="anonymous">
-  <link rel="preload" as="image" href="${html(c.hero.fallbackImage)}" imagesrcset="${html(c.hero.fallbackSrcset)}" imagesizes="100vw" fetchpriority="high">
+  <link rel="preload" as="image" href="${html(c.hero.fallbackImage)}" imagesrcset="${html(c.hero.fallbackSrcset)}" imagesizes="(max-width: 75rem) 100vw, 75rem" fetchpriority="high">
   <link rel="stylesheet" href="/src/site.css">
 </head>
 <body>
-  <!--
-    Page type: physical product plus assisted service. Theme: Atelier; warm paper and clay use the pinned brief tokens.
-    Dealt hero layout: Triptych, rejected because repeated panels conflict with the no-carousel/no-timed-tabs ban.
-    Chosen hero: one full-width, static-fallback product render with a single 600ms opening and no pointer tilt.
-    Picture inventory: original logo, one real album fallback, four format stand-ins, four material views, one work view,
-    three anonymous editing examples and three managed generated hero-page photographs. No client proof is claimed.
-  -->
   <a class="skip-link" href="#main-content">Skip to content</a>
   <header class="site-header" id="top">
     <div class="site-container header-row">
@@ -197,7 +192,7 @@ const h = `<!doctype html>
           </div>
         </div>
         <figure class="hero-stage" data-hero-stage>
-          <img class="hero-stage__fallback" data-hero-fallback src="${html(c.hero.fallbackImage)}" srcset="${html(c.hero.fallbackSrcset)}" sizes="100vw" width="1400" height="1050" alt="${html(c.hero.fallbackAlt)}" loading="eager" fetchpriority="high" decoding="async">
+          <img class="hero-stage__fallback" data-hero-fallback src="${html(c.hero.fallbackImage)}" srcset="${html(c.hero.fallbackSrcset)}" sizes="(max-width: 75rem) 100vw, 75rem" width="1400" height="830" alt="${html(c.hero.fallbackAlt)}" loading="eager" fetchpriority="high" decoding="async">
           <canvas class="hero-stage__canvas" data-hero-canvas aria-hidden="true" role="img" aria-label="${html(c.hero.audiences[0].canvasAlt)}"></canvas>
         </figure>
       </div>
@@ -272,8 +267,8 @@ const h = `<!doctype html>
               <span>${html(c.sections.services.after)}</span>
             </div>
             <div class="compare-frame" data-compare-frame style="--compare-position:50%">
-              ${responsiveImage(c.sections.services.examples[0].image, c.sections.services.examples[0].alt, { className: 'compare-frame__base', sizes: '(max-width: 800px) 100vw, 52vw' })}
-              ${responsiveImage(c.sections.services.examples[0].image, '', { className: 'compare-frame__after', sizes: '(max-width: 800px) 100vw, 52vw' })}
+              ${responsiveImage(c.sections.services.examples[0].after, `${c.sections.services.examples[0].alt} After editing.`, { className: 'compare-frame__after', sizes: '(max-width: 60rem) 100vw, 40rem' })}
+              ${responsiveImage(c.sections.services.examples[0].before, '', { className: 'compare-frame__before', sizes: '(max-width: 60rem) 100vw, 40rem' })}
               <span class="compare-frame__divider" aria-hidden="true"></span>
             </div>
             <label class="compare-control" for="editing-range">${html(c.sections.services.editRange)}</label>
@@ -282,10 +277,10 @@ const h = `<!doctype html>
         </div>
       </div>
     </section>
-    <section class="section section--packages" id="packages" aria-labelledby="packages-heading">
+    <section class="section section--packages" id="album-options" aria-labelledby="album-options-heading">
       <div class="site-container">
         <div class="section-heading">
-          <h2 id="packages-heading">${html(c.sections.packages.title)}</h2>
+          <h2 id="album-options-heading">${html(c.sections.packages.title)}</h2>
           <p>${html(c.sections.packages.introduction)}</p>
         </div>
         <div class="options-table-wrap" tabindex="0" role="region" aria-label="Album sizes, covers and page options">
@@ -311,7 +306,7 @@ const h = `<!doctype html>
             <li><a href="${html(c.sections.contact.messengerHref)}">${html(c.sections.contact.messengerLabel)}</a></li>
           </ul>
         </div>
-        <form class="contact-form" id="contact-form" action="${html(endpoint || '#contact')}" method="post" enctype="multipart/form-data" data-endpoint-configured="${Boolean(endpoint)}">
+        <form class="contact-form" id="contact-form" action="${html(endpoint || mailto)}" method="post" enctype="${endpoint ? 'multipart/form-data' : 'text/plain'}" data-endpoint-configured="${Boolean(endpoint)}">
           <div class="form-field">
             <label for="contact-name">${html(c.sections.contact.fieldLabels.name)}</label>
             <input id="contact-name" name="name" type="text" autocomplete="name" maxlength="100" aria-describedby="contact-name-error" required>
@@ -332,8 +327,11 @@ const h = `<!doctype html>
             <textarea id="contact-message" name="message" rows="4" maxlength="1200" aria-describedby="contact-message-error" required></textarea>
             <p class="field-error" id="contact-message-error" data-field-error="message" aria-live="polite"></p>
           </div>
-          <p class="form-status${contactMessage ? ' form-status--error' : ''}" id="contact-status" data-state="${contactMessage ? 'error' : 'idle'}" role="status" aria-live="polite"${contactMessage ? '' : ' hidden'}>${html(contactMessage)}</p>
-          <button class="button button--primary form-submit" type="submit"${endpoint ? '' : ' disabled'}>${html(c.sections.contact.submit)}</button>
+          <p class="form-status" id="contact-status" data-state="idle" role="status" aria-live="polite" hidden></p>
+          <div class="form-actions">
+            <button class="button button--primary form-submit" type="submit"${endpoint ? '' : ' aria-describedby="contact-note"'}>${html(c.sections.contact.submit)}</button>
+            ${endpoint ? '' : `<p class="form-note" id="contact-note">${html(c.sections.contact.mailtoNote)}</p>`}
+          </div>
         </form>
       </div>
     </section>

@@ -28,6 +28,7 @@
   --focus: #713b2c;
   --cover-leather: #302624;
   --page-paper: #f5f0e9;
+  --page-edge: #ddd3c5;
   --swatch-leather: #352b29;
   --swatch-linen: #c6b8a5;
   --swatch-acrylic: #8f918d;
@@ -385,9 +386,10 @@ a:hover {
   display: none;
 }
 
-.hero {
+.hero.section {
   display: flex;
   min-height: calc(100svh - var(--header-height));
+  padding-block: 0;
   background: var(--paper);
 }
 
@@ -484,9 +486,7 @@ a:hover {
 .hero-stage {
   position: relative;
   flex: 1 1 auto;
-  min-height: clamp(17.5rem, 42svh, 32rem);
-  overflow: hidden;
-  background: var(--surface-soft);
+  min-height: 17rem;
 }
 
 .hero-stage__fallback,
@@ -498,8 +498,8 @@ a:hover {
 }
 
 .hero-stage__fallback {
-  object-fit: cover;
-  object-position: center 56%;
+  object-fit: contain;
+  object-position: center;
   opacity: 1;
   transition: opacity var(--duration-exit) var(--ease-premium);
 }
@@ -507,7 +507,7 @@ a:hover {
 .hero-stage__canvas {
   display: block;
   opacity: 0;
-  transition: opacity var(--duration-exit) var(--ease-premium);
+  transition: opacity var(--duration-short) var(--ease-premium);
 }
 
 .hero-stage[data-model-ready="true"] .hero-stage__fallback {
@@ -844,7 +844,7 @@ a:hover {
   --compare-position: 50%;
 }
 
-.compare-frame__base,
+.compare-frame__before,
 .compare-frame__after {
   position: absolute;
   inset: 0;
@@ -854,13 +854,8 @@ a:hover {
   object-position: center;
 }
 
-.compare-frame__base {
-  filter: saturate(0.74) brightness(0.92);
-}
-
-.compare-frame__after {
+.compare-frame__before {
   clip-path: inset(0 calc(100% - var(--compare-position)) 0 0);
-  filter: saturate(1.08) contrast(1.03);
 }
 
 .compare-frame__divider {
@@ -1017,7 +1012,7 @@ a:hover {
 
 .form-field--message,
 .form-status,
-.form-submit {
+.form-actions {
   grid-column: 1 / -1;
 }
 
@@ -1073,8 +1068,18 @@ a:hover {
   border-inline-start-color: var(--accent-strong);
 }
 
-.form-submit {
-  justify-self: start;
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-5);
+}
+
+.form-note {
+  max-width: 36ch;
+  color: var(--muted);
+  font-size: 0.9375rem;
+  line-height: 1.45;
 }
 
 .site-footer {
@@ -1610,7 +1615,7 @@ a:hover {
 
   .form-field--message,
   .form-status,
-  .form-submit {
+  .form-actions {
     grid-column: 1;
   }
 

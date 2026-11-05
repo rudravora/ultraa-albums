@@ -61,15 +61,15 @@ const exampleItems = content.sections.services.examples;
 const exampleButtons = [...document.querySelectorAll('[data-example]')];
 const compareRange = document.querySelector('#editing-range');
 const compareFrame = document.querySelector('[data-compare-frame]');
-const compareBase = document.querySelector('.compare-frame__base');
+const compareBefore = document.querySelector('.compare-frame__before');
 const compareAfter = document.querySelector('.compare-frame__after');
 
 function setExample(id) {
   const item = exampleItems.find((example) => example.id === id);
   if (!item) return;
-  setResponsiveImage(compareBase, item.image);
-  setResponsiveImage(compareAfter, item.image);
-  compareBase.alt = item.alt;
+  setResponsiveImage(compareBefore, item.before);
+  setResponsiveImage(compareAfter, item.after);
+  compareAfter.alt = `${item.alt} After editing.`;
   for (const button of exampleButtons) {
     const selected = button.dataset.example === item.id;
     button.classList.toggle('is-selected', selected);
@@ -83,7 +83,7 @@ for (const button of exampleButtons) {
 
 function setComparePosition(value) {
   compareFrame.style.setProperty('--compare-position', `${value}%`);
-  compareRange.setAttribute('aria-valuetext', `${value}% after view`);
+  compareRange.setAttribute('aria-valuetext', `${value}% before, ${100 - value}% after`);
 }
 
 compareRange?.addEventListener('input', () => setComparePosition(compareRange.value));
@@ -188,7 +188,7 @@ const fieldMessages = {
 function fieldMessage(field) {
   if (!field.value.trim()) return fieldMessages[field.name] ?? '';
   if (field.name === 'email' && field.validity.typeMismatch) return contact.validation.emailInvalid;
-  if (field.validity.tooLong) return 'This entry is too long.';
+  if (field.validity.tooLong) return contact.validation.tooLong;
   return '';
 }
 
@@ -220,22 +220,28 @@ if (form) {
     });
   }
 
-  if (formEndpoint) {
-    form.action = formEndpoint;
-    form.dataset.endpointConfigured = 'true';
-    formStatus.hidden = true;
-    formStatus.textContent = '';
-    submit.disabled = false;
-  } else {
-    form.action = '#contact';
-    form.dataset.endpointConfigured = 'false';
+  function setStatus(state, message) {
     formStatus.hidden = false;
-    formStatus.dataset.state = 'error';
-    formStatus.classList.add('form-status--error');
-    formStatus.textContent = import.meta.env.VITE_ULTRAA_FORM_ENDPOINT
-      ? contact.invalidEndpoint
-      : contact.unconfigured;
-    submit.disabled = true;
+    formStatus.dataset.state = state;
+    formStatus.classList.toggle('form-status--error', state === 'error');
+    formStatus.classList.toggle('form-status--success', state === 'success');
+    formStatus.setAttribute('role', state === 'error' ? 'alert' : 'status');
+    formStatus.textContent = message;
+  }
+
+  // Opens the visitor's email app with the enquiry prefilled. Nothing is sent
+  // by this page, so the status says exactly that rather than claiming success.
+  function openEmail() {
+    const value = (name) => form.elements[name].value;
+    const details = [
+      `${contact.fieldLabels.name}: ${value('name')}`,
+      `${contact.fieldLabels.email}: ${value('email')}`,
+      value('phone') && `${contact.fieldLabels.phone}: ${value('phone')}`,
+    ].filter(Boolean);
+    const body = [value('message'), '', ...details].join('\n');
+    const href = `mailto:${contact.emailTo}?subject=${encodeURIComponent(contact.emailSubject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = href;
+    setStatus('info', contact.mailtoOpened);
   }
 
   form.addEventListener('submit', async (event) => {
@@ -243,32 +249,19 @@ if (form) {
     for (const field of fields) field.value = field.value.trim();
     const valid = fields.map(validateField).every(Boolean);
     if (!valid) {
-      formStatus.hidden = false;
-      formStatus.dataset.state = 'error';
-      formStatus.classList.add('form-status--error');
-      formStatus.textContent = contact.validation.form;
-      formStatus.setAttribute('role', 'alert');
+      setStatus('error', contact.validation.form);
       fields.find((field) => field.hasAttribute('aria-invalid'))?.focus();
       return;
     }
 
     if (!formEndpoint) {
-      formStatus.hidden = false;
-      formStatus.dataset.state = 'error';
-      formStatus.classList.add('form-status--error');
-      formStatus.setAttribute('role', 'alert');
-      formStatus.textContent = import.meta.env.VITE_ULTRAA_FORM_ENDPOINT
-        ? contact.invalidEndpoint
-        : contact.unconfigured;
+      openEmail();
       return;
     }
 
     submit.disabled = true;
-    formStatus.hidden = false;
-    formStatus.dataset.state = 'sending';
-    formStatus.classList.remove('form-status--error', 'form-status--success');
-    formStatus.setAttribute('role', 'status');
-    formStatus.textContent = contact.sending;
+    submit.setAttribute('aria-busy', 'true');
+    setStatus('sending', contact.sending);
 
     try {
       const response = await fetch(formEndpoint, {
@@ -278,22 +271,18 @@ if (form) {
         mode: 'cors',
         credentials: 'omit',
       });
-      if (!response.ok) throw new Error('The form service returned a non-success response.');
+      if (!response.ok) throw new Error(`Form service returned ${response.status}`);
       form.reset();
       for (const field of fields) {
         touched.delete(field);
         setFieldError(field, '');
       }
-      formStatus.dataset.state = 'success';
-      formStatus.classList.add('form-status--success');
-      formStatus.textContent = contact.sent;
+      setStatus('success', contact.sent);
     } catch {
-      formStatus.dataset.state = 'error';
-      formStatus.classList.add('form-status--error');
-      formStatus.setAttribute('role', 'alert');
-      formStatus.textContent = contact.failed;
+      setStatus('error', contact.failed);
     } finally {
       submit.disabled = false;
+      submit.removeAttribute('aria-busy');
     }
   });
 }
@@ -313,6 +302,9 @@ async function startAlbumScene() {
   } catch {
     heroStage.dataset.modelReady = 'false';
     canvas.setAttribute('aria-hidden', 'true');
+    fallback.srcset = content.hero.openSrcset;
+    fallback.src = content.hero.openImage;
+    fallback.alt = content.hero.openAlt;
     fallback.removeAttribute('aria-hidden');
   }
 }
