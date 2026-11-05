@@ -61,6 +61,11 @@
   --duration-short: 180ms;
   --duration-hero: 600ms;
   --duration-exit: 400ms;
+  --duration-reveal: 600ms;
+  --reveal-distance: 1rem;
+  --reveal-stagger: 70ms;
+  --hero-scrub-distance: 60svh;
+  --hero-still-scale: 1;
   --z-nav: 10;
   --z-menu: 30;
 }
@@ -401,6 +406,20 @@ a:hover {
   padding-block: var(--space-4) var(--space-5);
 }
 
+/* Scroll-driven album: the hero stays pinned while the book opens over
+   --hero-scrub-distance of scrolling. Added by JS only with WebGL and motion on. */
+.hero.hero--scrub {
+  align-items: flex-start;
+  height: calc(100svh - var(--header-height) + var(--hero-scrub-distance));
+}
+
+.hero--scrub .hero__inner {
+  position: sticky;
+  inset-block-start: 0;
+  height: calc(100svh - var(--header-height));
+  min-height: 0;
+}
+
 .hero__intro {
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 0.8fr);
@@ -500,6 +519,7 @@ a:hover {
 .hero-stage__fallback {
   object-fit: contain;
   object-position: center;
+  transform: scale(var(--hero-still-scale));
   opacity: 1;
   transition: opacity var(--duration-exit) var(--ease-premium);
 }
@@ -1415,6 +1435,7 @@ a:hover {
 @media (max-width: 40rem) {
   :root {
     --gutter: 1.25rem;
+    --hero-still-scale: 1.19;
   }
 
   body {
@@ -1658,6 +1679,18 @@ a:hover {
     flex-direction: column;
     align-items: stretch;
   }
+}
+
+/* Section reveal: set by JS only when motion is allowed (see main.js). */
+[data-reveal] {
+  transition:
+    opacity var(--duration-reveal) var(--ease-premium) calc(var(--reveal-i, 0) * var(--reveal-stagger)),
+    transform var(--duration-reveal) var(--ease-premium) calc(var(--reveal-i, 0) * var(--reveal-stagger));
+}
+
+[data-reveal]:not(.is-revealed) {
+  opacity: 0;
+  transform: translateY(var(--reveal-distance));
 }
 
 @media (prefers-reduced-motion: reduce) {

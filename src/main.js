@@ -287,19 +287,39 @@ if (form) {
   });
 }
 
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const hero = heroStage?.closest('.hero');
+const heroInner = hero?.querySelector('.hero__inner');
+
+// Under reduced motion the hero is not pinned: the book is drawn open.
+// Otherwise the hero pins for part of a screen and the book opens with the scroll.
+function heroProgress() {
+  const rect = hero.getBoundingClientRect();
+  const travel = rect.height - heroInner.offsetHeight;
+  return travel > 0 ? Math.min(Math.max(-rect.top / travel, 0), 1) : 1;
+}
+
 async function startAlbumScene() {
   if (!canvas || !heroStage) return;
+  if (!reducedMotion) hero.classList.add('hero--scrub');
   try {
     const { openAlbumScene } = await import('./album-scene.js');
     albumController = await openAlbumScene(canvas, currentAudience.pageImages, {
-      reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+      reducedMotion,
       onReady: () => {
         heroStage.dataset.modelReady = 'true';
         fallback.setAttribute('aria-hidden', 'true');
         canvas.setAttribute('aria-hidden', 'false');
       },
     });
+    if (albumController.setProgress) {
+      albumController.setProgress(heroProgress(), { immediate: true });
+      const follow = () => albumController.setProgress(heroProgress());
+      window.addEventListener('scroll', follow, { passive: true });
+      window.addEventListener('resize', follow, { passive: true });
+    }
   } catch {
+    hero.classList.remove('hero--scrub');
     heroStage.dataset.modelReady = 'false';
     canvas.setAttribute('aria-hidden', 'true');
     fallback.srcset = content.hero.openSrcset;
@@ -311,3 +331,32 @@ async function startAlbumScene() {
 
 startAlbumScene();
 window.addEventListener('pagehide', () => albumController?.dispose(), { once: true });
+
+// Once-only section reveals. Elements are visible by default; JS marks them as
+// pending only when motion is allowed, and each reveals the first time it enters
+// view. Stagger is per section and capped so a group finishes inside 500 ms.
+const revealTargets = [
+  '.section-heading', '.product-item', '.materials-detail', '.material-selector',
+  '.process-step', '.process-image', '.service-item', '.editing-demo',
+  '.options-table-wrap', '.options-note', '.options-cta', '.contact-methods', '.contact-form',
+  '.footer-main > *',
+];
+
+if (!reducedMotion && 'IntersectionObserver' in window) {
+  const observer = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      entry.target.classList.add('is-revealed');
+      observer.unobserve(entry.target);
+    }
+  }, { rootMargin: '0px 0px -10% 0px' });
+
+  for (const section of document.querySelectorAll('main > section:not(.hero), .site-footer')) {
+    const items = section.querySelectorAll(revealTargets.join(', '));
+    items.forEach((item, index) => {
+      item.dataset.reveal = '';
+      item.style.setProperty('--reveal-i', String(Math.min(index, 5)));
+      observer.observe(item);
+    });
+  }
+}
