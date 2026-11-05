@@ -16,7 +16,6 @@ function setAudience(id) {
   currentAudience = next;
   title.textContent = next.title;
   sentence.textContent = next.sentence;
-  canvas.setAttribute('aria-label', next.canvasAlt);
   html.dataset.audience = next.id;
 
   for (const button of audienceButtons) {
@@ -25,7 +24,8 @@ function setAudience(id) {
     button.setAttribute('aria-pressed', String(selected));
   }
 
-  albumController?.setPageImages(next.pageImages);
+  // Each audience has its own spread; the book turns to it.
+  goToSpread(next.spread);
 }
 
 for (const button of audienceButtons) {
@@ -290,13 +290,105 @@ if (form) {
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const hero = heroStage?.closest('.hero');
 const heroInner = hero?.querySelector('.hero__inner');
+const pager = document.querySelector('[data-hero-pager]');
+const pageButtons = [...(pager?.querySelectorAll('[data-page-step]') ?? [])];
+const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
-// Under reduced motion the hero is not pinned: the book is drawn open.
-// Otherwise the hero pins for part of a screen and the book opens with the scroll.
-function heroProgress() {
+// Scroll only opens and closes the book: while the hero is pinned, scrolling down
+// opens the cover and scrolling back closes it. Pages turn only by hand: a click,
+// a drag, the pager buttons or the audience switch. Turning a page while the book
+// is closed opens it too; scrolling back up to the top closes it again.
+let openedByHand = false;
+let lastScrollOpen = 0;
+
+function scrollOpen() {
+  if (!hero.classList.contains('hero--scrub')) return 1;
   const rect = hero.getBoundingClientRect();
   const travel = rect.height - heroInner.offsetHeight;
-  return travel > 0 ? Math.min(Math.max(-rect.top / travel, 0), 1) : 1;
+  const progress = travel > 0 ? clamp(-rect.top / travel, 0, 1) : 1;
+  // The last 15% of the pin rests on the open book before the page moves on.
+  return Math.min(progress / 0.85, 1);
+}
+
+function syncBookState() {
+  const spread = Math.round(albumController.spread);
+  const open = albumController.opened > 0.5;
+  pageButtons[0].disabled = !open || spread <= 0;
+  pageButtons[1].disabled = open && spread >= albumController.lastSpread;
+  canvas.setAttribute('aria-label', open ? content.hero.spreads[spread].alt : content.hero.fallbackAlt);
+}
+
+function followScroll({ immediate = false } = {}) {
+  const open = scrollOpen();
+  if (open < lastScrollOpen) openedByHand = false;
+  lastScrollOpen = open;
+  albumController.setOpen(openedByHand ? 1 : open, immediate ? { immediate } : undefined);
+  syncBookState();
+}
+
+function openByHand() {
+  if (albumController.opened >= 1) return;
+  openedByHand = true;
+  albumController.setOpen(1);
+}
+
+function goToSpread(index, options) {
+  if (!albumController) return;
+  openByHand();
+  albumController.setSpread(index, options);
+  syncBookState();
+}
+
+function step(direction) {
+  if (albumController.opened < 1) { openByHand(); syncBookState(); return; }
+  goToSpread(clamp(Math.round(albumController.spread) + direction, 0, albumController.lastSpread));
+}
+
+// Pointer: a click on the right half turns forward, on the left half back. A
+// horizontal drag moves the pages 1:1 and, on release, projects the drag's velocity
+// and settles on the nearest spread, carrying that velocity into the spring.
+function enablePointerTurns() {
+  let drag = null;
+  const pageWidth = () => Math.max(canvas.clientWidth * 0.4, 1);
+
+  canvas.addEventListener('pointerdown', (event) => {
+    if (event.button !== 0) return;
+    drag = { id: event.pointerId, x: event.clientX, y: event.clientY, start: albumController.pagePosition, moved: false, lastX: event.clientX, lastTime: event.timeStamp, velocity: 0 };
+  });
+
+  canvas.addEventListener('pointermove', (event) => {
+    if (!drag || event.pointerId !== drag.id || albumController.opened < 1) return;
+    const dx = event.clientX - drag.x;
+    if (!drag.moved) {
+      if (Math.abs(dx) < 6) return;
+      if (Math.abs(event.clientY - drag.y) > Math.abs(dx)) { drag = null; return; }
+      drag.moved = true;
+      canvas.setPointerCapture(event.pointerId);
+      canvas.classList.add('is-dragging');
+    }
+    const elapsed = (event.timeStamp - drag.lastTime) / 1000;
+    if (elapsed > 0) drag.velocity = -(event.clientX - drag.lastX) / pageWidth() / elapsed;
+    drag.lastX = event.clientX;
+    drag.lastTime = event.timeStamp;
+    goToSpread(drag.start - dx / pageWidth(), { immediate: true });
+  });
+
+  const end = (event, cancelled) => {
+    if (!drag || event.pointerId !== drag.id) return;
+    const { moved, velocity } = drag;
+    drag = null;
+    canvas.classList.remove('is-dragging');
+    if (moved) {
+      const fling = clamp(velocity, -8, 8);
+      const projected = albumController.pagePosition + fling * 0.15;
+      goToSpread(clamp(Math.round(projected), 0, albumController.lastSpread), { velocity: fling });
+    } else if (!cancelled) {
+      const rect = canvas.getBoundingClientRect();
+      step(event.clientX > rect.left + rect.width / 2 ? 1 : -1);
+    }
+  };
+  canvas.addEventListener('pointerup', (event) => end(event, false));
+  canvas.addEventListener('pointercancel', (event) => end(event, true));
 }
 
 async function startAlbumScene() {
@@ -304,7 +396,7 @@ async function startAlbumScene() {
   if (!reducedMotion) hero.classList.add('hero--scrub');
   try {
     const { openAlbumScene } = await import('./album-scene.js');
-    albumController = await openAlbumScene(canvas, currentAudience.pageImages, {
+    albumController = await openAlbumScene(canvas, content.hero.spreads, {
       reducedMotion,
       onReady: () => {
         heroStage.dataset.modelReady = 'true';
@@ -312,12 +404,12 @@ async function startAlbumScene() {
         canvas.setAttribute('aria-hidden', 'false');
       },
     });
-    if (albumController.setProgress) {
-      albumController.setProgress(heroProgress(), { immediate: true });
-      const follow = () => albumController.setProgress(heroProgress());
-      window.addEventListener('scroll', follow, { passive: true });
-      window.addEventListener('resize', follow, { passive: true });
-    }
+    followScroll({ immediate: true });
+    window.addEventListener('scroll', () => followScroll(), { passive: true });
+    window.addEventListener('resize', () => followScroll(), { passive: true });
+    for (const button of pageButtons) button.addEventListener('click', () => step(Number(button.dataset.pageStep)));
+    pager.hidden = false;
+    enablePointerTurns();
   } catch {
     hero.classList.remove('hero--scrub');
     heroStage.dataset.modelReady = 'false';
@@ -343,6 +435,7 @@ const revealTargets = [
 ];
 
 if (!reducedMotion && 'IntersectionObserver' in window) {
+  html.classList.add('reveal-on');
   const observer = new IntersectionObserver((entries) => {
     for (const entry of entries) {
       if (!entry.isIntersecting) continue;
