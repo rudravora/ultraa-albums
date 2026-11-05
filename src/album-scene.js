@@ -28,6 +28,9 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 // at exactly this aspect and shown with object-fit: contain, so the still and the
 // live canvas line up at every stage size.
 export const FRAME = { width: 4.05, height: 2.4 };
+// On portrait stages (phones) the frame is narrowed so the book reads larger. The
+// CSS still is scaled by FRAME.width / NARROW_WIDTH there (--hero-still-scale).
+const NARROW_WIDTH = 3.4;
 
 const BOARD = { width: 1.46, depth: 2.06, thickness: 0.05 };
 const BLOCK = { width: 1.4, depth: 1.98, thickness: 0.09 };
@@ -227,8 +230,9 @@ export async function openAlbumScene(canvas, initialImages, { reducedMotion = fa
   const fit = () => {
     const { width, height } = stage.getBoundingClientRect();
     const aspect = Math.max(1, width) / Math.max(1, height);
-    const frameAspect = FRAME.width / FRAME.height;
-    const viewHeight = aspect > frameAspect ? FRAME.height : FRAME.width / aspect;
+    const frameWidth = aspect < 1 ? NARROW_WIDTH : FRAME.width;
+    const frameAspect = frameWidth / FRAME.height;
+    const viewHeight = aspect > frameAspect ? FRAME.height : frameWidth / aspect;
     const viewWidth = viewHeight * aspect;
     Object.assign(camera, { left: -viewWidth / 2, right: viewWidth / 2, top: viewHeight / 2, bottom: -viewHeight / 2 });
     camera.updateProjectionMatrix();
@@ -288,24 +292,52 @@ export async function openAlbumScene(canvas, initialImages, { reducedMotion = fa
     return controller;
   }
 
-  // One 900 ms opening (Premium "dramatic reveal": 600-1200 ms), run once.
-  // The page settle trails the cover by 120 ms of follow-through.
+  // Scroll-driven opening. The page reports a target (0 closed, 1 open) and two
+  // critically damped springs follow it from their current value, so the motion is
+  // interruptible and reversible with no overshoot. The leaf spring is softer than
+  // the cover's, giving a little follow-through.
+  const cover = { value: 0, velocity: 0, omega: 13 };
+  const leaf = { value: 0, velocity: 0, omega: 8 };
+  let target = 0;
+  let last = 0;
+  const step = (spring, dt) => {
+    const force = -spring.omega * spring.omega * (spring.value - target) - 2 * spring.omega * spring.velocity;
+    spring.velocity += force * dt;
+    spring.value += spring.velocity * dt;
+  };
+  const settled = (spring) => Math.abs(spring.value - target) < 1e-4 && Math.abs(spring.velocity) < 1e-3;
+  const tick = (now) => {
+    const dt = Math.min((now - last) / 1000, 1 / 30);
+    last = now;
+    step(cover, dt);
+    step(leaf, dt);
+    if (settled(cover) && settled(leaf)) {
+      cover.value = leaf.value = target;
+      cover.velocity = leaf.velocity = 0;
+      frame = 0;
+    } else {
+      frame = requestAnimationFrame(tick);
+    }
+    pose(ease(MathUtils.clamp(cover.value, 0, 1)), MathUtils.clamp(leaf.value, 0, 1));
+    renderer.render(scene, camera);
+  };
+  controller.setProgress = (value, { immediate = false } = {}) => {
+    target = MathUtils.clamp(value, 0, 1);
+    if (immediate) {
+      cover.value = leaf.value = target;
+      cover.velocity = leaf.velocity = 0;
+      pose(ease(target), 0);
+      renderer.render(scene, camera);
+      return;
+    }
+    if (!frame) {
+      last = performance.now();
+      frame = requestAnimationFrame(tick);
+    }
+  };
+
   pose(0, 0);
   renderer.render(scene, camera);
   onReady();
-  const duration = 900;
-  const lag = 120;
-  const delay = 350;
-  const start = performance.now() + delay;
-  const tick = (now) => {
-    const elapsed = now - start;
-    const progress = ease(MathUtils.clamp(elapsed / duration, 0, 1));
-    const settle = MathUtils.clamp((elapsed - lag) / duration, 0, 1);
-    pose(progress, ease(settle));
-    renderer.render(scene, camera);
-    if (elapsed < duration + lag) frame = requestAnimationFrame(tick);
-    else { pose(1, 0); renderer.render(scene, camera); }
-  };
-  frame = requestAnimationFrame(tick);
   return controller;
 }
