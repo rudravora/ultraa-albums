@@ -1,36 +1,47 @@
 # Ultraa Albums homepage
 
-A light-mode, responsive, single-page redesign using semantic HTML, CSS, JavaScript, Vite and Three.js. It needs Node 22+ and pnpm 11.25.0. No application server or database is part of this static deliverable.
+A light-mode, single-page homepage for Ultraa Albums, built with semantic HTML, CSS, vanilla JavaScript, Vite and Three.js (the hero album only). Static output; no server or database.
 
-## Run and build
+Needs Node 22 or newer and pnpm (the version is pinned in `package.json`; `corepack enable` provides it).
+
+## Run
 
 ```sh
 pnpm install --frozen-lockfile
-pnpm dev
+pnpm dev        # http://localhost:3000, live reload
 ```
 
-`pnpm dev` renders the complete HTML from `src/content.js` before starting Vite on port 3000. The HTML includes the default fallback state, so the visible page does not rely on JavaScript for its content. To make a clean static build, run `pnpm build`; output is in `dist/`. To serve the built files locally, run `pnpm preview`.
+Build and serve the production files:
 
-Page copy, product data, destinations and image mappings are centralized in `src/content.js`; `scripts/render-home.mjs` emits root `index.html`. The single route is `/`, declared in `public/manus-routes.json`. The editable design tokens and all layout/motion rules are in `src/site.css`. The Three.js album is in `src/album-scene.js`, and the progressive enhancements are in `src/main.js`.
+```sh
+pnpm build      # writes dist/
+pnpm preview    # serves dist/ on http://localhost:3000
+```
 
-## Connect the contact form
+`pnpm dev` and `pnpm build` first run `scripts/render-home.mjs`, which writes `index.html` from `src/content.js`. `index.html` is generated, so it is git-ignored: edit `src/content.js` or the script, never the HTML. The page is complete without JavaScript; scripts add the 3D album, the controls, the scroll motion and the form handling.
 
-No form destination was provided, so the shipped page honestly says the form is not connected, keeps the submit button disabled and says nothing will be sent. Phone, Messenger and email links remain available.
+## Where things live
 
-To connect it, obtain an endpoint from the site’s chosen form provider that accepts a browser-submitted `multipart/form-data` POST and returns an HTTP 2xx status for acceptance. The JavaScript enhancement uses `fetch`, so the endpoint must allow CORS from the final site origin. Credentials are omitted. Do not place a private API key in this public frontend.
+- `src/content.js`: all copy, links, product data and image paths.
+- `scripts/render-home.mjs`: the static, accessible markup.
+- `src/site.css`: design tokens (`:root`), layout, states, motion and user-preference queries.
+- `src/main.js`: audience switch, material and editing controls, mobile menu, contact form, scroll motion.
+- `src/album-scene.js`: the Three.js album (geometry, page textures, the scroll-driven opening).
+- `public/assets/images`: WebP images. `album-closed-*` and `album-open-*` are stills rendered from the same Three.js scene and shown when WebGL or JavaScript is unavailable.
+- `public/assets/fonts`: self-hosted Newsreader (display) and Hanken Grotesk (text).
 
-Create a `.env.local` file in the project root and set:
+## Contact form
+
+With no endpoint configured, the form opens the visitor's email app with the enquiry addressed to ultraaalbums@gmail.com, and says so beside the button. Without JavaScript the same happens through a native `mailto:` form action. The page never shows a success message it cannot confirm.
+
+To post to a form service instead, copy `.env.example` to `.env.local` and set:
 
 ```env
-VITE_ULTRAA_FORM_ENDPOINT=<the real HTTPS POST endpoint issued to the site owner>
+VITE_ULTRAA_FORM_ENDPOINT=https://your-form-service.example/endpoint
 ```
 
-Replace the angle-bracket instruction with the real endpoint. This URL is public configuration, not a secret. Restart `pnpm dev` to render the no-script form action and button state from the same setting. When building for deployment, provide the same variable to the build environment before `pnpm build`. If the URL is missing or malformed, the form stays disabled with an honest error; it never shows success. A successful in-page confirmation appears only after the endpoint returns an OK response. If the request cannot be confirmed because of network, CORS or a non-2xx response, the entered values stay in place and the page gives a phone/Messenger recovery path.
+The endpoint must accept `multipart/form-data` POSTs, allow CORS from the site's origin and return a 2xx status on receipt. It is public configuration, not a secret; never put a private API key here. Restart `pnpm dev` (or rebuild) after changing it. Success is shown only after a 2xx response; anything else shows an error and keeps the visitor's text.
 
-Without JavaScript but with a configured endpoint, the HTML form still performs a standard native POST. With the endpoint unset, its submit button is disabled and the message says nothing is sent.
+## Replacing stand-in images
 
-## Assets and source notes
-
-The official logo and linked catalog are sourced from Ultraa Albums’ own public site. Local responsive WebP files include generated album, format, material and workflow stand-ins. The Three.js inner page photographs use the image-generation-managed paths reserved for the three new, generated hero-only scenes. These scenes are not local client assets and should be replaced by Ultraa-owned images before this design is used on the live marketing site. None of the generated images is genuine client work or a claim about a delivered order.
-
-Verified product facts, live link targets, phone, Messenger, email, no-article Journal decision and exclusions are recorded in `PRODUCT.md`. The form has no live destination in the delivered project. The four actual product formats are used in the comparison because no public Essential/Premium/Ultimate tiers were found. The homepage intentionally omits a Journal content section because no official title could be verified.
+Every photograph is a generated stand-in (listed in `HANDOFF.md`). Replace files in place, keeping names and the `-480`, `-800`, `-1200` widths. For the editing slider, each example is a pair: `editing-0N-before-*.webp` and `editing-0N-after-*.webp`.

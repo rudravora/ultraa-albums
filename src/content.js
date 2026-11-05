@@ -32,28 +32,48 @@ export const content = {
   ],
   hero: {
     audienceControl: 'Choose an audience',
+    previousPage: 'Previous page',
+    nextPage: 'Next page',
+    // Each audience opens the album at its own spread.
     audiences: [
       {
         id: 'couples',
         label: 'For couples',
         title: 'Wedding albums for couples',
         sentence: 'Keep wedding photographs together in a printed album.',
-        canvasAlt: 'An open wedding album with a garden ceremony photograph on each page.',
-        pageImages: [
-          image('editing-01-after'),
-          image('editing-02-after'),
-        ],
+        spread: 0,
       },
       {
         id: 'photographers',
         label: 'For photographers',
         title: 'Wedding albums for photographers',
         sentence: 'Send client photographs online and review the design before printing.',
-        canvasAlt: 'An open wedding album with a ceremony photograph and wedding details on its pages.',
-        pageImages: [
-          image('editing-02-after'),
-          image('editing-03-after'),
-        ],
+        spread: 2,
+      },
+    ],
+    // Album spreads drawn onto the 3D pages. Generated stand-in photographs, cropped
+    // per layout: full (one photo per page), pano (one photo across both pages),
+    // framed (one inset photo), pair (two inset photos). focus = [x, y] from 0 to 1.
+    spreads: [
+      {
+        alt: 'An open album: a couple under a flowering tree on the left page, a bride by a window on the right.',
+        left: { layout: 'full', src: image('editing-01-after', 1200), focus: [0.45, 0.55] },
+        right: { layout: 'full', src: image('editing-02-after', 1200), focus: [0.6, 0.5] },
+      },
+      {
+        alt: 'An open album with one panoramic photograph of a couple on a garden path across both pages.',
+        pano: { src: image('editing-03-after', 1200), focus: [0.5, 0.62], zoom: 1 },
+      },
+      {
+        alt: 'An open album with a designed layout: a bouquet and blossom details on the left page and one framed portrait on the right.',
+        left: {
+          layout: 'pair',
+          items: [
+            { src: image('editing-02-after', 1200), focus: [0.7, 0.47], zoom: 2.6 },
+            { src: image('editing-01-after', 1200), focus: [0.5, 0.12], zoom: 1.6 },
+          ],
+        },
+        right: { layout: 'framed', src: image('editing-03-after', 1200), focus: [0.5, 0.6], zoom: 1.25 },
       },
     ],
     fact: 'Made in Mumbai. Ships worldwide.',
@@ -62,14 +82,13 @@ export const content = {
     fallbackAlt: 'A closed dark leather album with a stitched border on its cover.',
     fallbackSrcset: [640, 960, 1400].map((w) => `${image('album-closed', w)} ${w}w`).join(', '),
     openImage: image('album-open', 1400),
-    openAlt: 'An open leather album with a full-page wedding photograph on each side.',
+    openAlt: 'An open leather album: a couple under a flowering tree on the left page, a bride by a window on the right.',
     openSrcset: [640, 960, 1400].map((w) => `${image('album-open', w)} ${w}w`).join(', '),
   },
   sections: {
     products: {
       id: 'products',
       title: 'Album formats',
-      introduction: 'Four album formats, with their own published options.',
       items: [
         {
           title: 'Luxury Albums',
@@ -112,8 +131,7 @@ export const content = {
     materials: {
       id: 'materials',
       title: 'Choose a cover',
-      introduction: 'Select a material to change the album view.',
-      legend: 'Select a cover material',
+      legend: 'Cover material',
       items: [
         {
           id: 'leather', label: 'Leather', image: image('material-leather'),
@@ -149,7 +167,6 @@ export const content = {
     services: {
       id: 'services',
       title: 'Design, editing and photography',
-      introduction: 'Album design, photo editing and wedding photography.',
       items: [
         {
           title: 'Album Design', description: 'Choose a pattern and review the soft-copy design.',
@@ -164,8 +181,8 @@ export const content = {
           href: 'https://ultraaalbums.com/photography/', action: 'See Wedding Photography',
         },
       ],
-      editControl: 'Compare the photograph before and after editing',
-      editRange: 'Move the slider to compare before and after',
+      editControl: 'Editing examples',
+      editRange: 'Drag to compare before and after',
       before: 'Before',
       after: 'After',
       // Each example is a real file pair. Until Ultraa supplies its own edits, the
@@ -197,19 +214,19 @@ export const content = {
       rows: [
         {
           format: 'Luxury Albums',
-          sizes: 'Not listed by Ultraa.',
+          sizes: 'Not listed.',
           covers: 'Acrylic, leather, hardcover, linen, wood or canvas.',
           pages: 'Flush-mounted pages. No page count listed.',
         },
         {
           format: 'Flush Mount Albums',
-          sizes: 'Not listed by Ultraa.',
+          sizes: 'Not listed.',
           covers: 'Photo, acrylic, metal, canvas, linen or leather.',
           pages: '1 mm standard or 1.5 mm extra-thick. 0.5 mm prints; white or black substrate.',
         },
         {
           format: 'Layflat Albums',
-          sizes: 'Not listed by Ultraa.',
+          sizes: 'Not listed.',
           covers: 'Acrylic, canvas, linen, leather, photo, metal or wood.',
           pages: 'Thinner, lighter page block with panoramic two-page spreads.',
         },

@@ -174,6 +174,7 @@ const h = `<!doctype html>
   </header>
   <main id="main-content">
     <section class="hero section" aria-labelledby="hero-title">
+      <div class="hero__backdrop" aria-hidden="true"></div>
       <div class="site-container hero__inner">
         <div class="hero__intro">
           <div class="hero__headline">
@@ -192,8 +193,16 @@ const h = `<!doctype html>
           </div>
         </div>
         <figure class="hero-stage" data-hero-stage>
-          <img class="hero-stage__fallback" data-hero-fallback src="${html(c.hero.fallbackImage)}" srcset="${html(c.hero.fallbackSrcset)}" sizes="(max-width: 75rem) 100vw, 75rem" width="1400" height="830" alt="${html(c.hero.fallbackAlt)}" loading="eager" fetchpriority="high" decoding="async">
-          <canvas class="hero-stage__canvas" data-hero-canvas aria-hidden="true" role="img" aria-label="${html(c.hero.audiences[0].canvasAlt)}"></canvas>
+          <span class="crop-mark crop-mark--tl" aria-hidden="true"></span>
+          <span class="crop-mark crop-mark--tr" aria-hidden="true"></span>
+          <span class="crop-mark crop-mark--bl" aria-hidden="true"></span>
+          <span class="crop-mark crop-mark--br" aria-hidden="true"></span>
+          <img class="hero-stage__fallback" data-hero-fallback src="${html(c.hero.fallbackImage)}" srcset="${html(c.hero.fallbackSrcset)}" sizes="(max-width: 75rem) 100vw, 75rem" width="1400" height="1153" alt="${html(c.hero.fallbackAlt)}" loading="eager" fetchpriority="high" decoding="async">
+          <canvas class="hero-stage__canvas" data-hero-canvas aria-hidden="true" role="img" aria-label="${html(c.hero.spreads[0].alt)}"></canvas>
+          <div class="hero-pager" data-hero-pager hidden>
+            <button class="hero-pager__button" type="button" data-page-step="-1" aria-label="${html(c.hero.previousPage)}"><svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M12.5 4.5 7 10l5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <button class="hero-pager__button" type="button" data-page-step="1" aria-label="${html(c.hero.nextPage)}"><svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M7.5 4.5 13 10l-5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          </div>
         </figure>
       </div>
     </section>
@@ -201,7 +210,6 @@ const h = `<!doctype html>
       <div class="site-container">
         <div class="section-heading">
           <h2 id="products-heading">${html(c.sections.products.title)}</h2>
-          <p>${html(c.sections.products.introduction)}</p>
         </div>
         <div class="product-grid">
           ${c.sections.products.items.map(productItem).join('')}
@@ -213,8 +221,7 @@ const h = `<!doctype html>
         <div class="materials-copy">
           <div class="section-heading section-heading--left">
             <h2 id="materials-heading">${html(c.sections.materials.title)}</h2>
-            <p>${html(c.sections.materials.introduction)}</p>
-          </div>
+            </div>
           <fieldset class="material-selector">
             <legend>${html(c.sections.materials.legend)}</legend>
             <div class="material-selector__choices">
@@ -247,7 +254,6 @@ const h = `<!doctype html>
       <div class="site-container">
         <div class="section-heading">
           <h2 id="services-heading">${html(c.sections.services.title)}</h2>
-          <p>${html(c.sections.services.introduction)}</p>
         </div>
         <div class="services-layout">
           <ul class="services-list">
