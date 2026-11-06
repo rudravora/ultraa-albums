@@ -440,7 +440,14 @@ async function startAlbumScene() {
   }
 }
 
-startAlbumScene();
+// Start the 3D scene once the page has loaded and the main thread is idle; the
+// still image holds the stage until then, so first paint is never blocked.
+function whenIdle(callback) {
+  const run = () => ('requestIdleCallback' in window ? requestIdleCallback(callback, { timeout: 1500 }) : setTimeout(callback, 200));
+  if (document.readyState === 'complete') run();
+  else window.addEventListener('load', run, { once: true });
+}
+whenIdle(startAlbumScene);
 window.addEventListener('pagehide', () => albumController?.dispose(), { once: true });
 
 // Once-only section reveals. Elements are visible by default; JS marks them as
