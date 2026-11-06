@@ -41,8 +41,8 @@ export const content = {
       {
         id: 'couples',
         label: 'For couples',
-        title: 'Wedding albums',
-        accent: 'for couples',
+        title: 'Your wedding story,',
+        accent: 'beautifully printed to revisit for years',
         sentence: 'Keep wedding photographs together in a printed album.',
         spread: 0,
       },

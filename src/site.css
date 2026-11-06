@@ -193,7 +193,7 @@ h3 {
 
 h1 {
   max-width: 16ch;
-  font-size: clamp(2.5rem, 3.8vw, 3.4375rem);
+  font-size: clamp(2.5rem, 3.5vw, 3.125rem);
   line-height: 1.05;
   letter-spacing: -0.028em;
 }
@@ -558,8 +558,15 @@ a:hover {
   text-transform: uppercase;
 }
 
+@media (min-width: 40rem) {
+  .hero__fact {
+    white-space: nowrap;
+  }
+}
+
 .hero__fact::after {
-  width: 3rem;
+  flex: 0 1 3rem;
+  min-width: 1rem;
   height: 1px;
   background: currentColor;
   content: "";
