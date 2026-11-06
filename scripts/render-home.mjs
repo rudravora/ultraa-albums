@@ -138,6 +138,16 @@ const h = `<!doctype html>
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
+  <div class="top-bar">
+    <div class="site-container top-bar__row">
+      <p class="top-bar__fact">${html(c.hero.fact)}</p>
+      <div class="top-bar__links">
+        <a href="${html(c.sections.contact.phoneHref)}"><svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M6.6 3.5H4.4a1 1 0 0 0-1 1.1 13 13 0 0 0 12 12 1 1 0 0 0 1.1-1v-2.2a1 1 0 0 0-.8-1l-2.6-.6a1 1 0 0 0-1 .3l-1 1.1a10 10 0 0 1-4.1-4.1l1.1-1a1 1 0 0 0 .3-1l-.6-2.6a1 1 0 0 0-1-.8Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>${html(c.sections.contact.phoneLabel)}</a>
+        <a class="top-bar__secondary" href="${html(c.sections.contact.emailHref)}">${html(c.sections.contact.emailTo)}</a>
+        <a class="top-bar__secondary" href="${html(c.external.payOnline)}">Pay online<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M7 13 13 7M8 7h5v5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      </div>
+    </div>
+  </div>
   <header class="site-header" id="top">
     <div class="site-container header-row">
       <a class="brand" href="${html(c.brand.home)}" aria-label="${html(c.brand.name)} home">
@@ -148,7 +158,6 @@ const h = `<!doctype html>
           ${productMenu()}
           ${primaryLinks('nav-links')}
         </div>
-        <a class="utility-link" href="${html(c.external.payOnline)}">Pay online</a>
         <a class="button button--primary header-cta" href="#contact">${html(c.actions.primary)}</a>
       </div>
       <a class="button button--primary header-cta header-cta--compact" href="#contact">${html(c.actions.primary)}</a>
@@ -186,7 +195,6 @@ const h = `<!doctype html>
             <p class="hero__sentence" data-hero-sentence>${html(c.hero.audiences[0].sentence)}</p>
           </div>
           <div class="hero__actions">
-            <p class="hero__fact">${html(c.hero.fact)}</p>
             <div class="action-row">
               <a class="button button--primary" href="#contact">${html(c.actions.primary)}</a>
               <a class="button button--secondary" href="#contact">${html(c.actions.secondary)}</a>
