@@ -45,3 +45,7 @@ The endpoint must accept `multipart/form-data` POSTs, allow CORS from the site's
 ## Replacing stand-in images
 
 Every photograph is a generated stand-in (listed in `HANDOFF.md`). Replace files in place, keeping names and the `-480`, `-800`, `-1200` widths. For the editing slider, each example is a pair: `editing-0N-before-*.webp` and `editing-0N-after-*.webp`.
+
+## Research
+
+The earlier website research (Ultraa Albums and Zno) that was this repository's original README is in [docs/website-intelligence-report.md](docs/website-intelligence-report.md).
