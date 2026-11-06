@@ -34,11 +34,15 @@
   --accent-strong: #713b2c;
   --accent-ink: #ffffff;
   --focus: #713b2c;
-  --cover-leather: #302624;
+  --cover-leather: #2a1815;
+  --cover-sheen: #6e4334;
+  --foil: #c2a06a;
+  --brass: #b8955a;
+  --orbit: #a8957d;
+  --light-pool: #fffdf9;
   --page-paper: #f5f0e9;
   --page-edge: #ddd3c5;
   --linen: #f1ebe3;
-  --crop-mark: #cbbfb0;
   --swatch-leather: #352b29;
   --swatch-linen: #c6b8a5;
   --swatch-acrylic: #8f918d;
@@ -65,6 +69,9 @@
   --space-20: 5rem;
   --space-24: 6rem;
   --measure: 68ch;
+  --text-ui: 0.9375rem;
+  --text-small: 0.875rem;
+  --underline-offset: 0.2em;
   --space-section: clamp(4rem, 7vw, 6.75rem);
   --space-heading: clamp(2rem, 4vw, 3rem);
   --gap-split: clamp(2.5rem, 6vw, 5rem);
@@ -141,6 +148,10 @@ body {
   font: inherit;
 }
 
+:where(input, textarea) {
+  caret-color: var(--accent);
+}
+
 button {
   cursor: pointer;
 }
@@ -212,7 +223,7 @@ a {
   color: var(--accent-strong);
   text-decoration-color: currentColor;
   text-decoration-thickness: 0.0625em;
-  text-underline-offset: 0.2em;
+  text-underline-offset: var(--underline-offset);
   text-decoration-skip-ink: auto;
 }
 
@@ -297,7 +308,7 @@ a:hover {
   min-height: 2.75rem;
   align-items: center;
   color: var(--ink);
-  font-size: 0.9375rem;
+  font-size: var(--text-ui);
   font-weight: 500;
   text-decoration: none;
   white-space: nowrap;
@@ -310,7 +321,7 @@ a:hover {
 .mobile-menu__links a:hover {
   color: var(--accent-strong);
   text-decoration: underline;
-  text-underline-offset: 0.25em;
+  text-underline-offset: var(--underline-offset);
 }
 
 .nav-products {
@@ -359,9 +370,9 @@ a:hover {
 
 .utility-link {
   min-height: 2.75rem;
-  font-size: 0.875rem;
+  font-size: var(--text-small);
   text-decoration: underline;
-  text-underline-offset: 0.18em;
+  text-underline-offset: var(--underline-offset);
 }
 
 .button {
@@ -421,13 +432,13 @@ a:hover {
 }
 
 /* A flat linen ground behind the book column, running off the right edge like a
-   tabletop. Its left edge sits on the column split of .hero__inner's grid (5fr | 7fr). */
+   tabletop. Its left edge sits on the column split of .hero__inner's grid (4.5fr | 7.5fr). */
 .hero__backdrop {
   --container: min(100% - var(--gutter) * 2, var(--content-max));
   position: absolute;
   inset-block: 0;
   inset-inline-end: 0;
-  inset-inline-start: calc((100% - var(--container)) / 2 + (var(--container) - var(--gap-hero)) * 5 / 12 + var(--gap-hero) / 2);
+  inset-inline-start: calc((100% - var(--container)) / 2 + (var(--container) - var(--gap-hero)) * 4.5 / 12 + var(--gap-hero) / 2);
   background: var(--linen);
 }
 
@@ -435,7 +446,7 @@ a:hover {
   position: relative;
   display: grid;
   min-height: inherit;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  grid-template-columns: minmax(0, 4.5fr) minmax(0, 7.5fr);
   align-items: stretch;
   gap: var(--gap-hero);
   padding-block: var(--space-6);
@@ -479,13 +490,13 @@ a:hover {
 
 .audience-switch__choice,
 .example-choice {
-  min-height: 2.5rem;
+  min-height: 2.75rem;
   padding: 0.45rem 0.875rem;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--surface);
   color: var(--ink);
-  font-size: 0.9375rem;
+  font-size: var(--text-ui);
   font-weight: 500;
   transition: transform var(--duration-hover) var(--ease-premium), opacity var(--duration-hover) var(--ease-premium);
 }
@@ -541,22 +552,6 @@ a:hover {
   min-height: 26rem;
 }
 
-/* Printer's crop marks at the corners of the book's area: two hairlines each,
-   set off the corner like the marks on a print sheet. */
-.crop-mark {
-  position: absolute;
-  width: var(--space-6);
-  height: var(--space-6);
-  border-color: var(--crop-mark);
-  border-style: solid;
-  border-width: 0;
-  pointer-events: none;
-}
-
-.crop-mark--tl { inset-block-start: var(--space-4); inset-inline-start: var(--space-4); border-block-start-width: 1px; border-inline-start-width: 1px; }
-.crop-mark--tr { inset-block-start: var(--space-4); inset-inline-end: var(--space-4); border-block-start-width: 1px; border-inline-end-width: 1px; }
-.crop-mark--bl { inset-block-end: var(--space-4); inset-inline-start: var(--space-4); border-block-end-width: 1px; border-inline-start-width: 1px; }
-.crop-mark--br { inset-block-end: var(--space-4); inset-inline-end: var(--space-4); border-block-end-width: 1px; border-inline-end-width: 1px; }
 
 /* Turn controls for keyboard and pointer users; shown by JS once the book is live. */
 .hero-pager[hidden] {
@@ -632,6 +627,10 @@ a:hover {
 }
 
 .hero-stage__canvas {
+  /* Stretched by main.js over the whole linen ground (--canvas-* are negative). */
+  inset: var(--canvas-top, 0px) auto auto var(--canvas-left, 0px);
+  width: calc(100% - var(--canvas-left, 0px) - var(--canvas-right, 0px));
+  height: calc(100% - var(--canvas-top, 0px) - var(--canvas-bottom, 0px));
   display: block;
   opacity: 0;
   transition: opacity var(--duration-short) var(--ease-premium);
@@ -758,10 +757,10 @@ a:hover {
 
 .text-link {
   color: var(--accent-strong);
-  font-size: 0.9375rem;
+  font-size: var(--text-ui);
   font-weight: 600;
   text-decoration: underline;
-  text-underline-offset: 0.22em;
+  text-underline-offset: var(--underline-offset);
 }
 
 .materials-layout,
@@ -820,7 +819,7 @@ a:hover {
   border-radius: var(--radius-sm);
   background: var(--surface);
   color: var(--ink);
-  font-size: 0.9375rem;
+  font-size: var(--text-ui);
   font-weight: 500;
   transition: transform var(--duration-hover) var(--ease-premium), opacity var(--duration-hover) var(--ease-premium);
 }
@@ -951,7 +950,7 @@ a:hover {
 
 .example-choice {
   min-height: 2.75rem;
-  font-size: 0.9375rem;
+  font-size: var(--text-ui);
 }
 
 .compare-labels {
@@ -959,7 +958,7 @@ a:hover {
   justify-content: space-between;
   margin-block-end: var(--space-2);
   color: var(--muted);
-  font-size: 0.9375rem;
+  font-size: var(--text-ui);
   font-weight: 600;
 }
 
@@ -999,7 +998,7 @@ a:hover {
   display: block;
   margin-block: var(--space-3) var(--space-2);
   color: var(--ink);
-  font-size: 0.9375rem;
+  font-size: var(--text-ui);
   font-weight: 500;
 }
 
@@ -1070,7 +1069,7 @@ a:hover {
 
 .options-table thead th {
   color: var(--muted);
-  font-size: 0.875rem;
+  font-size: var(--text-small);
   font-weight: 600;
 }
 
@@ -1176,7 +1175,7 @@ a:hover {
 
 .field-error {
   color: var(--accent-strong);
-  font-size: 0.9375rem;
+  font-size: var(--text-ui);
   font-weight: 500;
 }
 
@@ -1203,7 +1202,7 @@ a:hover {
 .form-note {
   max-width: 36ch;
   color: var(--muted);
-  font-size: 0.9375rem;
+  font-size: var(--text-ui);
   line-height: 1.45;
 }
 
@@ -1231,7 +1230,7 @@ a:hover {
   display: inline-flex;
   min-height: 2.75rem;
   align-items: center;
-  font-size: 0.9375rem;
+  font-size: var(--text-ui);
   font-weight: 600;
 }
 
@@ -1256,10 +1255,10 @@ a:hover {
 
 .footer-group a {
   display: inline-flex;
-  min-height: 2.5rem;
+  min-height: 2.75rem;
   align-items: center;
   color: var(--muted);
-  font-size: 0.9375rem;
+  font-size: var(--text-ui);
   text-decoration: none;
 }
 
@@ -1271,7 +1270,7 @@ a:hover {
   padding-block-start: var(--space-4);
   border-block-start: 1px solid var(--border);
   color: var(--muted);
-  font-size: 0.875rem;
+  font-size: var(--text-small);
 }
 
 .footer-bottom a {
@@ -1295,12 +1294,12 @@ a:hover {
 
   .nav-links a,
   .nav-products > summary {
-    font-size: 0.875rem;
+    font-size: var(--text-small);
   }
 
   .header-cta {
     padding-inline: var(--space-3);
-    font-size: 0.9375rem;
+    font-size: var(--text-ui);
   }
 
   .materials-layout,
@@ -1357,7 +1356,7 @@ a:hover {
     font-weight: 600;
     list-style: none;
     text-decoration: underline;
-    text-underline-offset: 0.22em;
+    text-underline-offset: var(--underline-offset);
   }
 
   .mobile-menu__trigger::-webkit-details-marker {
@@ -1526,7 +1525,7 @@ a:hover {
   .table-cell-label {
     display: block;
     color: var(--muted);
-    font-size: 0.875rem;
+    font-size: var(--text-small);
     font-weight: 600;
   }
 }
@@ -1647,7 +1646,7 @@ a:hover {
   }
 
   .product-item__text .text-link {
-    font-size: 0.875rem;
+    font-size: var(--text-small);
   }
 
 

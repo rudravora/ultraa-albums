@@ -349,7 +349,7 @@ function step(direction) {
 // and settles on the nearest spread, carrying that velocity into the spring.
 function enablePointerTurns() {
   let drag = null;
-  const pageWidth = () => Math.max(canvas.clientWidth * 0.4, 1);
+  const pageWidth = () => Math.max(heroStage.clientWidth * 0.4, 1);
 
   canvas.addEventListener('pointerdown', (event) => {
     if (event.button !== 0) return;
@@ -383,7 +383,7 @@ function enablePointerTurns() {
       const projected = albumController.pagePosition + fling * 0.15;
       goToSpread(clamp(Math.round(projected), 0, albumController.lastSpread), { velocity: fling });
     } else if (!cancelled) {
-      const rect = canvas.getBoundingClientRect();
+      const rect = heroStage.getBoundingClientRect();
       step(event.clientX > rect.left + rect.width / 2 ? 1 : -1);
     }
   };
@@ -391,9 +391,28 @@ function enablePointerTurns() {
   canvas.addEventListener('pointercancel', (event) => end(event, true));
 }
 
+// Stretch the canvas from the stage out to the linen ground's edges (and the
+// pinned hero's full height), so the background reaches the edge of the screen.
+const backdrop = hero?.querySelector('.hero__backdrop');
+function stretchCanvas() {
+  const stage = heroStage.getBoundingClientRect();
+  const ground = backdrop?.getBoundingClientRect();
+  const inner = heroInner.getBoundingClientRect();
+  const wide = ground && ground.width > 0;
+  heroStage.style.setProperty('--canvas-left', `${wide ? ground.left - stage.left : 0}px`);
+  heroStage.style.setProperty('--canvas-right', `${wide ? stage.right - ground.right : 0}px`);
+  heroStage.style.setProperty('--canvas-top', `${wide ? inner.top - stage.top : 0}px`);
+  // While pinned, the inner block is a header-height shorter than the screen; run
+  // the canvas down to the screen's bottom edge so the orbits are not cut short.
+  const header = hero.classList.contains('hero--scrub') ? hero.offsetTop : 0;
+  heroStage.style.setProperty('--canvas-bottom', `${wide ? stage.bottom - inner.bottom - header : 0}px`);
+}
+
 async function startAlbumScene() {
   if (!canvas || !heroStage) return;
   if (!reducedMotion) hero.classList.add('hero--scrub');
+  stretchCanvas();
+  window.addEventListener('resize', stretchCanvas, { passive: true });
   try {
     const { openAlbumScene } = await import('./album-scene.js');
     albumController = await openAlbumScene(canvas, content.hero.spreads, {

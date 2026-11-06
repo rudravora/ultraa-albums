@@ -7,13 +7,18 @@ import {
   FrontSide,
   Group,
   HemisphereLight,
+  LineBasicMaterial,
+  LineLoop,
   LineDashedMaterial,
   LineSegments,
   MathUtils,
   Mesh,
+  MeshBasicMaterial,
+  MeshPhysicalMaterial,
   MeshStandardMaterial,
   NoToneMapping,
   OrthographicCamera,
+  PMREMGenerator,
   PCFSoftShadowMap,
   PlaneGeometry,
   RepeatWrapping,
@@ -24,11 +29,12 @@ import {
   WebGLRenderer,
 } from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 // The framing box (world units on the view plane). The CSS still image is rendered
 // at exactly this aspect and shown with object-fit: contain, so the still and the
 // live canvas line up at every stage size.
-export const FRAME = { width: 3.4, height: 2.8 };
+export const FRAME = { width: 3.2, height: 2.65 };
 
 const BOARD = { width: 1.46, depth: 2.06, thickness: 0.05 };
 const BLOCK = { width: 1.4, depth: 1.98, thickness: 0.09 };
@@ -50,11 +56,11 @@ function loadImage(src) {
   return image.decode().then(() => image);
 }
 
-function canvas2d(width, height) {
+function canvas2d(width, height, { alpha = false } = {}) {
   const element = document.createElement('canvas');
   element.width = width;
   element.height = height;
-  const context = element.getContext('2d', { alpha: false });
+  const context = element.getContext('2d', { alpha });
   if (!context) throw new Error('2D canvas unavailable');
   return [element, context];
 }
@@ -158,6 +164,73 @@ function leatherBump() {
   return texture;
 }
 
+// A gold-foil rule framing the cover, as four thin flat strips on its outer face.
+function foilFrame(y, material) {
+  const group = new Group();
+  const x0 = -BOARD.width + 0.16;
+  const x1 = -0.24;
+  const z0 = -BOARD.depth / 2 + 0.16;
+  const z1 = BOARD.depth / 2 - 0.16;
+  const rule = 0.011;
+  const strip = (width, depth, x, z) => {
+    const mesh = new Mesh(new PlaneGeometry(width, depth), material);
+    mesh.rotation.x = Math.PI / 2;
+    mesh.position.set(x, y, z);
+    group.add(mesh);
+  };
+  strip(x1 - x0 + rule, rule, (x0 + x1) / 2, z0);
+  strip(x1 - x0 + rule, rule, (x0 + x1) / 2, z1);
+  strip(rule, z1 - z0, x0, (z0 + z1) / 2);
+  strip(rule, z1 - z0, x1, (z0 + z1) / 2);
+  return group;
+}
+
+// Brass protectors on a board's two outer corners. `side` is -1 for the front
+// board (outer edge at -x) and 1 for the back board.
+function brassCorners(side, centreY, material) {
+  const geometry = new RoundedBoxGeometry(0.13, BOARD.thickness + 0.012, 0.13, 2, 0.012);
+  return [-1, 1].map((end) => {
+    const mesh = new Mesh(geometry, material);
+    mesh.position.set(side * (BOARD.width - 0.06), centreY, end * (BOARD.depth / 2 - 0.06));
+    mesh.castShadow = true;
+    return mesh;
+  });
+}
+
+// A soft pool of warm light on the table under the album (alpha falls off radially).
+function lightPool() {
+  const [pool, context] = canvas2d(256, 256, { alpha: true });
+  const falloff = context.createRadialGradient(128, 128, 0, 128, 128, 128);
+  falloff.addColorStop(0, 'rgba(255, 255, 255, 1)');
+  falloff.addColorStop(0.55, 'rgba(255, 255, 255, 0.45)');
+  falloff.addColorStop(1, 'rgba(255, 255, 255, 0)');
+  context.fillStyle = falloff;
+  context.fillRect(0, 0, 256, 256);
+  const texture = new CanvasTexture(pool);
+  const mesh = new Mesh(new PlaneGeometry(6.4, 5), new MeshBasicMaterial({
+    color: new Color(cssValue('--light-pool')), map: texture, transparent: true, depthWrite: false, toneMapped: false,
+  }));
+  mesh.rotation.x = -Math.PI / 2;
+  mesh.position.y = -0.002;
+  mesh.renderOrder = -1;
+  return mesh;
+}
+
+// A hairline orbit: a circle of `radius` on the table plane, optionally dashed.
+function orbit(radius, { dashed = false, opacity = 0.5 } = {}) {
+  const points = Array.from({ length: 256 }, (_, i) => {
+    const t = (i / 256) * Math.PI * 2;
+    return new Vector3(Math.cos(t) * radius, 0, Math.sin(t) * radius);
+  });
+  const colour = new Color(cssValue('--orbit'));
+  const material = dashed
+    ? new LineDashedMaterial({ color: colour, dashSize: 0.045, gapSize: 0.05, transparent: true, opacity })
+    : new LineBasicMaterial({ color: colour, transparent: true, opacity });
+  const line = new LineLoop(new BufferGeometry().setFromPoints(points), material);
+  if (dashed) line.computeLineDistances();
+  return line;
+}
+
 // A stitched border inset from the cover edge, on the cover's outer face.
 function coverStitching(y) {
   const inset = 0.09;
@@ -256,8 +329,14 @@ export async function openAlbumScene(canvas, spreads, { reducedMotion = false, o
   camera.position.set(0.2, 7, 3.2);
   camera.lookAt(0, 0.12, -0.22);
 
-  scene.add(new HemisphereLight(new Color(cssValue('--surface')), new Color(cssValue('--border')), 2.1));
-  const key = new DirectionalLight(new Color(cssValue('--surface')), 2.4);
+  // A neutral studio environment gives the leather, foil and brass real reflections.
+  const pmrem = new PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  scene.environmentIntensity = 0.36;
+  pmrem.dispose();
+
+  scene.add(new HemisphereLight(new Color(cssValue('--surface')), new Color(cssValue('--border')), 1.05));
+  const key = new DirectionalLight(new Color(cssValue('--surface')), 2.2);
   key.position.set(-2.6, 6.5, 2.2);
   key.castShadow = true;
   key.shadow.mapSize.set(2048, 2048);
@@ -266,17 +345,24 @@ export async function openAlbumScene(canvas, spreads, { reducedMotion = false, o
   key.shadow.normalBias = 0.01;
   scene.add(key);
 
-  const ground = new Mesh(new PlaneGeometry(30, 30), new ShadowMaterial({ opacity: 0.14 }));
+  const ground = new Mesh(new PlaneGeometry(30, 30), new ShadowMaterial({ opacity: 0.16 }));
   ground.rotation.x = -Math.PI / 2;
   ground.receiveShadow = true;
   scene.add(ground);
 
   const bump = leatherBump();
-  const leather = new MeshStandardMaterial({
-    color: new Color(cssValue('--cover-leather')), roughness: 0.78, metalness: 0, bumpMap: bump, bumpScale: 0.6,
+  const leather = new MeshPhysicalMaterial({
+    color: new Color(cssValue('--cover-leather')), roughness: 0.6, metalness: 0, bumpMap: bump, bumpScale: 0.5,
+    clearcoat: 0.2, clearcoatRoughness: 0.5, sheen: 0.35, sheenRoughness: 0.6, sheenColor: new Color(cssValue('--cover-sheen')),
   });
   const paper = new MeshStandardMaterial({ color: new Color(cssValue('--page-paper')), roughness: 0.95 });
-  const edge = new MeshStandardMaterial({ color: new Color(cssValue('--surface')), map: pageEdgeTexture(), roughness: 0.95 });
+  // Gilded page edges: gold leaf over the stacked-page lines.
+  const edgeLines = pageEdgeTexture();
+  const edge = new MeshStandardMaterial({
+    color: new Color(cssValue('--foil')), metalness: 0.85, roughness: 0.38, bumpMap: edgeLines, bumpScale: 0.4,
+  });
+  const foil = new MeshStandardMaterial({ color: new Color(cssValue('--foil')), metalness: 1, roughness: 0.3, side: FrontSide });
+  const brass = new MeshStandardMaterial({ color: new Color(cssValue('--brass')), metalness: 1, roughness: 0.28 });
   // BoxGeometry material order: +x, -x, +y, -y, +z, -z.
   const blockMaterials = [edge, edge, paper, paper, edge, edge];
   const print = (canvasImage, options = {}) => new MeshStandardMaterial({
@@ -305,7 +391,7 @@ export async function openAlbumScene(canvas, spreads, { reducedMotion = false, o
   lastPage.rotation.x = -Math.PI / 2;
   lastPage.position.set(PAGE.width / 2 + PAGE.inset, SURFACE + 0.0005, 0);
   const spine = shade(new Mesh(spineGeometry, leather));
-  album.add(backBoard, backBlock, lastPage, spine);
+  album.add(backBoard, backBlock, lastPage, spine, ...brassCorners(1, BOARD.thickness / 2, brass));
 
   // Leaves: leaf k carries spread k's right page on its front and spread k+1's
   // left page on its back. They stack on the right and land on the left in order.
@@ -331,21 +417,49 @@ export async function openAlbumScene(canvas, spreads, { reducedMotion = false, o
   const firstPage = shade(new Mesh(pageGeometry, print(pages[0][0])));
   firstPage.rotation.x = -Math.PI / 2;
   firstPage.position.set(-PAGE.width / 2 - PAGE.inset, SURFACE + 0.0005 - HINGE_Y, 0);
-  front.add(frontBoard, frontBlock, firstPage, coverStitching(-HINGE_Y - 0.002));
+  front.add(frontBoard, frontBlock, firstPage, coverStitching(-HINGE_Y - 0.002), foilFrame(-HINGE_Y - 0.0015, foil), ...brassCorners(-1, BOARD.thickness / 2 - HINGE_Y, brass));
   album.add(front);
+
+  // Background: a light pool and hairline orbits on the table around the album,
+  // turned a little by the cover and the pages (never on their own). The stills
+  // are captured without them (data-decor="off").
+  const decor = new Group();
+  const tilted = new Group();
+  if (canvas.dataset.decor !== 'off') {
+    decor.add(lightPool(), orbit(2.05, { opacity: 0.75 }), orbit(2.7, { dashed: true, opacity: 0.7 }), orbit(3.45, { opacity: 0.45 }));
+    const rise = orbit(1.85, { opacity: 0.55 });
+    rise.rotation.set(1.08, 0, -0.32);
+    const riseDashed = orbit(2.35, { dashed: true, opacity: 0.45 });
+    riseDashed.rotation.set(1.3, 0, 0.45);
+    tilted.add(rise, riseDashed);
+    tilted.position.y = 0.1;
+    scene.add(decor, tilted);
+  }
 
   const lastSpread = spreads.length - 1;
 
   // Fit the FRAME box inside the stage (contain), matching the still image.
+  // The canvas may extend past the stage (to the edge of the linen ground); the
+  // camera still fits the book to the stage and simply sees more table around it.
   const fit = () => {
-    const { width, height } = stage.getBoundingClientRect();
-    const aspect = Math.max(1, width) / Math.max(1, height);
-    const frameAspect = FRAME.width / FRAME.height;
-    const viewHeight = aspect > frameAspect ? FRAME.height : FRAME.width / aspect;
-    const viewWidth = viewHeight * aspect;
-    Object.assign(camera, { left: -viewWidth / 2, right: viewWidth / 2, top: viewHeight / 2, bottom: -viewHeight / 2 });
+    const box = stage.getBoundingClientRect();
+    const view = canvas.getBoundingClientRect();
+    const width = Math.max(1, box.width);
+    const height = Math.max(1, box.height);
+    const aspect = width / height;
+    // Portrait stages (phones) get a wider frame so the open spread never clips.
+    const frameWidth = aspect < 1 ? FRAME.width * 1.12 : FRAME.width;
+    const frameAspect = frameWidth / FRAME.height;
+    const viewHeight = aspect > frameAspect ? FRAME.height : frameWidth / aspect;
+    const perPixel = viewHeight / height;
+    Object.assign(camera, {
+      left: (-width / 2 - (box.left - view.left)) * perPixel,
+      right: (width / 2 + (view.right - box.right)) * perPixel,
+      top: (height / 2 + (box.top - view.top)) * perPixel,
+      bottom: (-height / 2 - (view.bottom - box.bottom)) * perPixel,
+    });
     camera.updateProjectionMatrix();
-    renderer.setSize(Math.max(1, width), Math.max(1, height), false);
+    renderer.setSize(Math.max(1, view.width), Math.max(1, view.height), false);
     renderer.render(scene, camera);
   };
 
@@ -365,6 +479,8 @@ export async function openAlbumScene(canvas, spreads, { reducedMotion = false, o
     // open spread ends centred too. The spine drops below the page line when open.
     album.position.x = -(BOARD.width / 2) * (1 - opened);
     spine.scale.y = MathUtils.lerp(1, 0.45, opened);
+    decor.rotation.y = 0.35 * opened + 0.16 * springs.pages.value;
+    tilted.rotation.y = -0.25 * opened - 0.12 * springs.pages.value;
     leaves.forEach((leaf, k) => {
       const turned = ease(MathUtils.clamp(springs.pages.value - k, 0, 1));
       const offset = MathUtils.lerp(leaf.rightLift - HINGE_Y, HINGE_Y - leaf.leftLift, turned);
@@ -376,6 +492,7 @@ export async function openAlbumScene(canvas, spreads, { reducedMotion = false, o
   fit();
   const resizeObserver = new ResizeObserver(fit);
   resizeObserver.observe(stage);
+  resizeObserver.observe(canvas);
 
   // Critically damped springs: each starts from its current value and velocity, so
   // any input can grab and reverse it mid-motion, with no overshoot. Under reduced
