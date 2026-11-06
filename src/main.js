@@ -106,8 +106,9 @@ function updateMobileMenu(open, moveFocus = false) {
   if (desktopNavigation) desktopNavigation.inert = open;
   if (pageMain) pageMain.inert = open;
   if (pageFooter) pageFooter.inert = open;
-  if (open && moveFocus) menuClose?.focus();
-  if (!open && moveFocus) menu.querySelector('summary')?.focus();
+  if (open && moveFocus) menuClose?.focus({ preventScroll: true });
+  // The trigger sits in the sticky header, always on screen: don't let focus scroll the page.
+  if (!open && moveFocus) menu.querySelector('summary')?.focus({ preventScroll: true });
 }
 
 menu?.addEventListener('toggle', () => {
@@ -117,7 +118,7 @@ menu?.addEventListener('toggle', () => {
   if (desktopNavigation) desktopNavigation.inert = open;
   if (pageMain) pageMain.inert = open;
   if (pageFooter) pageFooter.inert = open;
-  if (open) requestAnimationFrame(() => menuClose?.focus());
+  if (open) requestAnimationFrame(() => menuClose?.focus({ preventScroll: true }));
 });
 
 menuClose?.addEventListener('click', () => updateMobileMenu(false, true));
@@ -307,7 +308,9 @@ function scrollOpen() {
   if (!hero.classList.contains('hero--scrub')) return 1;
   const rect = hero.getBoundingClientRect();
   const travel = rect.height - heroInner.offsetHeight;
-  const progress = travel > 0 ? clamp(-rect.top / travel, 0, 1) : 1;
+  // The inner block pins below the sticky header, so the pin starts there, not at 0.
+  const pinTop = parseFloat(getComputedStyle(heroInner).top) || 0;
+  const progress = travel > 0 ? clamp((pinTop - rect.top) / travel, 0, 1) : 1;
   // The last 15% of the pin rests on the open book before the page moves on.
   return Math.min(progress / 0.85, 1);
 }
@@ -408,10 +411,7 @@ function stretchCanvas() {
   heroStage.style.setProperty('--canvas-left', `${wide ? ground.left - stage.left : 0}px`);
   heroStage.style.setProperty('--canvas-right', `${wide ? stage.right - ground.right : 0}px`);
   heroStage.style.setProperty('--canvas-top', `${wide ? inner.top - stage.top : 0}px`);
-  // While pinned, the inner block is a header-height shorter than the screen; run
-  // the canvas down to the screen's bottom edge so the orbits are not cut short.
-  const header = hero.classList.contains('hero--scrub') ? hero.offsetTop : 0;
-  heroStage.style.setProperty('--canvas-bottom', `${wide ? stage.bottom - inner.bottom - header : 0}px`);
+  heroStage.style.setProperty('--canvas-bottom', `${wide ? stage.bottom - inner.bottom : 0}px`);
 }
 
 async function startAlbumScene() {

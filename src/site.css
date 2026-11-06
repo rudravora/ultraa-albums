@@ -60,6 +60,7 @@
   --content-max: 75rem;
   --gutter: clamp(1.5rem, 4.3vw, 4rem);
   --header-height: 4.5rem;
+  --top-bar-height: 2.25rem;
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -111,7 +112,7 @@ body {
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-block-start: var(--header-height);
+  scroll-padding-block-start: calc(var(--header-height) + var(--top-bar-height));
   scrollbar-color: var(--accent-strong) var(--paper);
   scrollbar-width: thin;
   -webkit-text-size-adjust: 100%;
@@ -255,8 +256,58 @@ a:hover {
   transform: translateY(0);
 }
 
+/* A slim leather-coloured bar above the header; both stay pinned while scrolling. */
+.top-bar {
+  position: sticky;
+  z-index: var(--z-nav);
+  inset-block-start: 0;
+  background: var(--cover-leather);
+  color: var(--linen);
+  font-size: 0.8125rem;
+  letter-spacing: 0.02em;
+}
+
+.top-bar__row {
+  display: flex;
+  min-height: var(--top-bar-height);
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.top-bar__links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.top-bar a {
+  display: inline-flex;
+  min-height: var(--top-bar-height);
+  align-items: center;
+  gap: var(--space-2);
+  color: inherit;
+  text-decoration: none;
+  text-underline-offset: var(--underline-offset);
+}
+
+.top-bar a:hover {
+  text-decoration: underline;
+}
+
+.top-bar a:focus-visible {
+  outline-color: var(--linen);
+}
+
+.top-bar svg {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex: none;
+}
+
 .site-header {
-  position: relative;
+  position: sticky;
+  inset-block-start: var(--top-bar-height);
   z-index: var(--z-nav);
   min-height: var(--header-height);
   border-block-end: 1px solid var(--border);
@@ -432,7 +483,7 @@ a:hover {
 .hero.section {
   position: relative;
   display: flex;
-  min-height: calc(100svh - var(--header-height));
+  min-height: calc(100svh - var(--header-height) - var(--top-bar-height));
   padding-block: 0;
   background: var(--paper);
 }
@@ -460,13 +511,13 @@ a:hover {
    --hero-scrub-distance of scrolling. Added by JS only with WebGL and motion on. */
 .hero.hero--scrub {
   align-items: flex-start;
-  height: calc(100svh - var(--header-height) + var(--hero-scrub-distance));
+  height: calc(100svh - var(--header-height) - var(--top-bar-height) + var(--hero-scrub-distance));
 }
 
 .hero--scrub .hero__inner {
   position: sticky;
-  inset-block-start: 0;
-  height: calc(100svh - var(--header-height));
+  inset-block-start: calc(var(--header-height) + var(--top-bar-height));
+  height: calc(100svh - var(--header-height) - var(--top-bar-height));
   min-height: 0;
 }
 
@@ -544,33 +595,6 @@ a:hover {
 .hero__accent {
   display: block;
   color: var(--accent-strong);
-}
-
-/* A tracked label with a hairline rule, like a caption on a spec sheet. */
-.hero__fact {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  color: var(--accent-strong);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-@media (min-width: 40rem) {
-  .hero__fact {
-    white-space: nowrap;
-  }
-}
-
-.hero__fact::after {
-  flex: 0 1 3rem;
-  min-width: 1rem;
-  height: 1px;
-  background: currentColor;
-  content: "";
-  opacity: 0.5;
 }
 
 .action-row {
@@ -735,7 +759,7 @@ a:hover {
   /* The rings and light pool fade out with the linen; the canvas runs a header
      height past the hero, so its fade is that much longer. */
   mask-image:
-    linear-gradient(to bottom, var(--ink) calc(100% - var(--hero-fade) - var(--header-height)), transparent),
+    linear-gradient(to bottom, var(--ink) calc(100% - var(--hero-fade)), transparent),
     linear-gradient(to right, transparent calc(var(--canvas-left, 0px) * -0.3), var(--ink) calc(var(--canvas-left, 0px) * -1));
   mask-composite: intersect;
 }
@@ -1689,11 +1713,11 @@ a:hover {
     justify-content: flex-start;
   }
 
-  .hero__fact {
+  .top-bar {
     font-size: 0.75rem;
   }
 
-  .hero__fact::after,
+  .top-bar .top-bar__secondary,
   .hero-pager__hint {
     display: none;
   }
@@ -1713,7 +1737,7 @@ a:hover {
   }
 
   .hero-stage {
-    min-height: clamp(16rem, 39svh, 22rem);
+    min-height: clamp(15rem, 36svh, 22rem);
   }
 
   .section {
