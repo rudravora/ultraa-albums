@@ -120,7 +120,7 @@ if (endpointValue && !endpoint) console.warn('VITE_ULTRAA_FORM_ENDPOINT is not a
 const mailto = `mailto:${c.sections.contact.emailTo}?subject=${encodeURIComponent(c.sections.contact.emailSubject)}`;
 
 const h = `<!doctype html>
-<html lang="en" data-type="product" data-radius="soft" data-buttons="solid" data-motion="premium">
+<html lang="en" data-type="product" data-radius="soft" data-buttons="solid">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -151,6 +151,7 @@ const h = `<!doctype html>
         <a class="utility-link" href="${html(c.external.payOnline)}">Pay online</a>
         <a class="button button--primary header-cta" href="#contact">${html(c.actions.primary)}</a>
       </div>
+      <a class="button button--primary header-cta header-cta--compact" href="#contact">${html(c.actions.primary)}</a>
       <details class="mobile-menu" id="mobile-menu">
         <summary class="mobile-menu__trigger">Menu</summary>
         <div class="mobile-menu__panel">
@@ -226,7 +227,7 @@ const h = `<!doctype html>
           </fieldset>
         </div>
         <div class="materials-detail">
-          ${responsiveImage(c.sections.materials.items[0].image, c.sections.materials.items[0].alt, { className: 'materials-detail__image', sizes: '(max-width: 800px) 100vw, 52vw' })}
+          ${responsiveImage(c.sections.materials.items[0].image, c.sections.materials.items[0].alt, { className: 'materials-detail__image', sizes: '(max-width: 60rem) 100vw, 52vw' })}
         </div>
       </div>
     </section>
@@ -242,7 +243,7 @@ const h = `<!doctype html>
           </ol>
         </div>
         <div class="process-image">
-          ${responsiveImage(c.sections.process.image, c.sections.process.imageAlt, { sizes: '(max-width: 800px) 100vw, 48vw', width: 800, height: 600 })}
+          ${responsiveImage(c.sections.process.image, c.sections.process.imageAlt, { sizes: '(max-width: 60rem) 100vw, 48vw', width: 800, height: 600 })}
         </div>
       </div>
     </section>

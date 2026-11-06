@@ -454,7 +454,7 @@ const revealTargets = [
 ];
 
 if (!reducedMotion && 'IntersectionObserver' in window) {
-  html.classList.add('reveal-on');
+  html.classList.add('js');
   const observer = new IntersectionObserver((entries) => {
     for (const entry of entries) {
       if (!entry.isIntersecting) continue;

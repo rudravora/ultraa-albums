@@ -97,7 +97,7 @@ export const content = {
           action: 'See Luxury Albums',
           image: image('luxury-cover'),
           alt: 'Stitched dark leather album cover on natural stone beside an open wedding book.',
-          ratio: '4 / 5',
+          ratio: '4 / 3',
         },
         {
           title: 'Flush Mount Albums',
@@ -124,13 +124,13 @@ export const content = {
           action: 'See Photo Books',
           image: image('photo-book'),
           alt: 'An open photo book with a wedding-family scene and smaller photographs on the pages.',
-          ratio: '4 / 5',
+          ratio: '4 / 3',
         },
       ],
     },
     materials: {
       id: 'materials',
-      title: 'Choose a cover',
+      title: 'Cover materials',
       legend: 'Cover material',
       items: [
         {
@@ -209,35 +209,35 @@ export const content = {
     packages: {
       id: 'album-options',
       title: 'Album options',
-      introduction: 'Published sizes, covers and page choices by album format.',
+      introduction: 'Published options for each album format.',
       columns: ['Album format', 'Sizes', 'Covers', 'Pages'],
       rows: [
         {
           format: 'Luxury Albums',
-          sizes: 'Not listed.',
+          sizes: 'Not listed',
           covers: 'Acrylic, leather, hardcover, linen, wood or canvas.',
-          pages: 'Flush-mounted pages. No page count listed.',
+          pages: 'Flush-mounted pages.',
         },
         {
           format: 'Flush Mount Albums',
-          sizes: 'Not listed.',
+          sizes: 'Not listed',
           covers: 'Photo, acrylic, metal, canvas, linen or leather.',
-          pages: '1 mm standard or 1.5 mm extra-thick. 0.5 mm prints; white or black substrate.',
+          pages: '1 mm or 1.5 mm extra-thick; white or black substrate.',
         },
         {
           format: 'Layflat Albums',
-          sizes: 'Not listed.',
+          sizes: 'Not listed',
           covers: 'Acrylic, canvas, linen, leather, photo, metal or wood.',
-          pages: 'Thinner, lighter page block with panoramic two-page spreads.',
+          pages: 'Thinner page block; panoramic spreads.',
         },
         {
           format: 'Photo Books',
-          sizes: '6 × 8 in; 9 × 12 in; wedding books, 12 × 18 in; mini books, 5 × 5 in.',
+          sizes: '6 × 8, 9 × 12, 12 × 18 (wedding) and 5 × 5 in (mini).',
           covers: 'Photo-printed, laminated covers.',
-          pages: 'Non-tearable paper; glossy, matt or feather-touch finish.',
+          pages: 'Non-tearable; glossy, matt or feather-touch.',
         },
       ],
-      note: 'Printed photo sizes listed separately: 4 × 6 in, 5 × 7 in and 6 × 8 in.',
+      note: 'Print sizes, listed separately: 4 × 6, 5 × 7 and 6 × 8 in.',
     },
     contact: {
       id: 'contact',
