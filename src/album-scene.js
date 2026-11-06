@@ -323,6 +323,10 @@ export async function openAlbumScene(canvas, spreads, { reducedMotion = false, o
   renderer.toneMapping = NoToneMapping;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = PCFSoftShadowMap;
+  // A strict GPU can reject a shader; then the canvas would stay empty. Record it,
+  // and fail the scene after the first frame so the page shows the still instead.
+  let shaderFailed = false;
+  renderer.debug.onShaderError = () => { shaderFailed = true; };
 
   const scene = new Scene();
   const camera = new OrthographicCamera(-1, 1, 1, -1, 0.1, 40);
@@ -556,6 +560,10 @@ export async function openAlbumScene(canvas, spreads, { reducedMotion = false, o
   };
 
   pose();
+  if (shaderFailed) {
+    controller.dispose();
+    throw new Error('A shader failed to compile');
+  }
   onReady();
   return controller;
 }

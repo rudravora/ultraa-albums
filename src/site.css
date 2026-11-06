@@ -1,11 +1,14 @@
 /* Hallmark · shape: Product catalogue · genre: editorial · theme: Atelier (dealt in the Manus run) · job: buy · draw: manual
  * hero: product stage, the album opens with scroll (owner override of the no-scroll rule) · nav: edge-aligned logo, links, Pay online, one action · footer: four link columns under the logo and catalog link · imagery: the product (Three.js render) and generated stand-in photographs · signature: the leather album opening to a full-bleed wedding spread
- * axes: light/roman-serif/warm · posture: restrained · contrast: pass · fold: pass · v2.0.0 */
+ * axes: light/roman-serif/warm · posture: restrained · surface: absolute · contrast: pass · fold: pass · v2.0.0 */
 /* Hallmark · pre-emit critique: P4 H4 E4 S4 R4 V3 · weakest: V, the section order is a familiar catalogue run; the hero album, the material swap and the real-format table carry the specificity */
 /* Hallmark · waive 7b · --surface #ffffff is pinned by the client brief token block · the brief names the white surface for header, form and footer bands */
-/* Hallmark · answered 11 · the brief requires photographs to zoom 1.02 inside their frame on hover; the frame clips them */
-/* Hallmark · answered 42 · the four link columns are the brief's footer list: products, services, support and legal */
+/* Hallmark · dismissed 11 · the brief requires album photographs to zoom 1.02 inside their clipped frame on hover */
+/* Hallmark · dismissed 42 · the brief lists the footer as album products, services, support and legal columns */
 /* Hallmark · answered F7 · the shared recipe is the segmented and swatch controls, one control family by design */
+/* Hallmark · dismissed 58 · the 90-word screen is the album options table, published specs that cannot be cut further */
+/* Hallmark · waive 44c · the album sits below the copy's centre line on purpose · the cover swings up as it opens and needs headroom above the book */
+/* Hallmark · answered F15 · the album grid and the contact form use their own gaps; every two-column split shares --gap-split */
 @font-face {
   font-family: "Newsreader";
   src: url("/assets/fonts/display.woff2") format("woff2");
@@ -30,6 +33,7 @@
   --surface: #ffffff;
   --surface-soft: #f3eee8;
   --border: #e7e2dc;
+  --field-edge: #8f857a;
   --accent: #9a5b43;
   --accent-strong: #713b2c;
   --accent-ink: #ffffff;
@@ -72,15 +76,13 @@
   --text-ui: 0.9375rem;
   --text-small: 0.875rem;
   --underline-offset: 0.2em;
-  --space-section: clamp(4rem, 7vw, 6.75rem);
+  --space-section: clamp(4.5rem, 8vw, 7.5rem);
   --space-heading: clamp(2rem, 4vw, 3rem);
   --gap-split: clamp(2.5rem, 6vw, 5rem);
   --gap-grid-x: clamp(1rem, 2.4vw, 2rem);
   --gap-grid-y: clamp(2rem, 4vw, 3.5rem);
   --gap-hero: clamp(1.5rem, 4.5vw, 4rem);
   --gap-nav: clamp(0.75rem, 1.2vw, 1.25rem);
-  --offset-grid-lg: clamp(1.5rem, 5vw, 3.5rem);
-  --offset-grid-sm: clamp(1.25rem, 3.5vw, 2.5rem);
   --space-footer: clamp(3rem, 6vw, 5rem);
   --ease-premium: cubic-bezier(0.4, 0, 0.2, 1);
   --duration-hover: 80ms;
@@ -191,13 +193,13 @@ h3 {
 
 h1 {
   max-width: 16ch;
-  font-size: clamp(2.5rem, 3.9vw, 4rem);
+  font-size: clamp(2.5rem, 4.2vw, 4.25rem);
   line-height: 1.05;
   letter-spacing: -0.028em;
 }
 
 h2 {
-  font-size: clamp(2.25rem, 4.1vw, 3.5rem);
+  font-size: clamp(2rem, 3.2vw, 3rem);
   line-height: 1.08;
   letter-spacing: -0.02em;
 }
@@ -415,11 +417,15 @@ a:hover {
 
 .button:disabled {
   border-color: var(--border);
-  background: var(--border);
+  background: var(--surface-soft);
   color: var(--muted);
 }
 
 .mobile-menu {
+  display: none;
+}
+
+.header-cta--compact {
   display: none;
 }
 
@@ -599,7 +605,7 @@ a:hover {
 .hero-pager__button:disabled {
   border-color: var(--border);
   background: var(--paper);
-  color: var(--border);
+  color: var(--muted);
 }
 
 .hero-stage__canvas {
@@ -696,7 +702,6 @@ a:hover {
 .product-item:nth-child(2) {
   grid-column: 8 / span 5;
   grid-row: 1;
-  margin-block-start: var(--offset-grid-lg);
 }
 
 .product-item:nth-child(3) {
@@ -707,7 +712,6 @@ a:hover {
 .product-item:nth-child(4) {
   grid-column: 6 / span 7;
   grid-row: 2;
-  margin-block-start: var(--offset-grid-sm);
 }
 
 .product-item__link {
@@ -767,7 +771,7 @@ a:hover {
 .process-layout {
   display: grid;
   grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
-  align-items: center;
+  align-items: start;
   gap: var(--gap-split);
 }
 
@@ -1153,8 +1157,8 @@ a:hover {
 .form-field textarea {
   width: 100%;
   min-height: 3.25rem;
-  padding: 0.75rem 0.875rem;
-  border: 1px solid var(--border);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--field-edge);
   border-radius: var(--radius-sm);
   background: var(--surface);
   color: var(--ink);
@@ -1228,6 +1232,7 @@ a:hover {
 
 .catalog-link {
   display: inline-flex;
+  white-space: nowrap;
   min-height: 2.75rem;
   align-items: center;
   font-size: var(--text-ui);
@@ -1344,6 +1349,12 @@ a:hover {
     display: block;
   }
 
+  /* Between phone and desktop the main action stays in the bar beside the menu. */
+  .header-cta--compact {
+    display: inline-flex;
+    margin-inline-start: auto;
+  }
+
   .mobile-menu__trigger {
     display: inline-flex;
     min-width: 4rem;
@@ -1388,6 +1399,7 @@ a:hover {
 
   .mobile-menu__close {
     min-height: 2.75rem;
+    white-space: nowrap;
     padding: 0 var(--space-3);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
@@ -1530,6 +1542,12 @@ a:hover {
   }
 }
 
+@media (max-width: 30rem) {
+  .header-cta--compact {
+    display: none;
+  }
+}
+
 @media (max-width: 40rem) {
   :root {
     --gutter: 1.25rem;
@@ -1617,7 +1635,6 @@ a:hover {
   .product-item:nth-child(2) {
     grid-column: 8 / span 5;
     grid-row: 1;
-    margin-block-start: var(--space-6);
   }
 
   .product-item:nth-child(3) {
@@ -1628,7 +1645,6 @@ a:hover {
   .product-item:nth-child(4) {
     grid-column: 6 / span 7;
     grid-row: 2;
-    margin-block-start: var(--space-4);
   }
 
   .product-item__link {
@@ -1750,6 +1766,10 @@ a:hover {
 }
 
 @media (max-width: 21rem) {
+  .footer-main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .product-grid {
     column-gap: var(--space-2);
   }
@@ -1773,13 +1793,13 @@ a:hover {
 }
 
 /* Section reveal: set by JS only when motion is allowed (see main.js). */
-html.reveal-on [data-reveal] {
+html.js [data-reveal] {
   transition:
     opacity var(--duration-reveal) var(--ease-premium) calc(var(--reveal-i, 0) * var(--reveal-stagger)),
     transform var(--duration-reveal) var(--ease-premium) calc(var(--reveal-i, 0) * var(--reveal-stagger));
 }
 
-html.reveal-on [data-reveal]:not(.is-revealed) {
+html.js [data-reveal]:not(.is-revealed) {
   opacity: 0;
   transform: translateY(var(--reveal-distance));
 }
