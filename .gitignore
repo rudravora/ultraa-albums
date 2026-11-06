@@ -9,3 +9,5 @@ dist/
 index.html
 .hallmark/shots/
 screenshots/
+.DS_Store
+.vercel
