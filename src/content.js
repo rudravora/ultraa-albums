@@ -34,19 +34,23 @@ export const content = {
     audienceControl: 'Choose an audience',
     previousPage: 'Previous page',
     nextPage: 'Next page',
+    spreadLabel: 'Spread',
+    turnHint: 'Click or drag a page to turn it',
     // Each audience opens the album at its own spread.
     audiences: [
       {
         id: 'couples',
         label: 'For couples',
-        title: 'Wedding albums for couples',
+        title: 'Wedding albums',
+        accent: 'for couples',
         sentence: 'Keep wedding photographs together in a printed album.',
         spread: 0,
       },
       {
         id: 'photographers',
         label: 'For photographers',
-        title: 'Wedding albums for photographers',
+        title: 'Wedding albums',
+        accent: 'for photographers',
         sentence: 'Send client photographs online and review the design before printing.',
         spread: 2,
       },

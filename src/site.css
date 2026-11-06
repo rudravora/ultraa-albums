@@ -437,16 +437,12 @@ a:hover {
   background: var(--paper);
 }
 
-/* A flat linen ground behind the book column, running off the right edge like a
-   tabletop. Its left edge sits on the column split of .hero__inner's grid (4.5fr | 7.5fr). */
+/* One linen field across the whole hero, so the book and the headline share a
+   ground with no seam; it dissolves into the page at the bottom. */
 .hero__backdrop {
-  --container: min(100% - var(--gutter) * 2, var(--content-max));
   position: absolute;
-  inset-block: 0;
-  inset-inline-end: 0;
-  inset-inline-start: calc((100% - var(--container)) / 2 + (var(--container) - var(--gap-split)) * 4.5 / 12 + var(--gap-split) / 2);
+  inset: 0;
   background: var(--linen);
-  /* The linen dissolves into the page instead of ending on a hard line. */
   mask-image: linear-gradient(to bottom, var(--ink) calc(100% - var(--hero-fade)), transparent);
 }
 
@@ -475,6 +471,8 @@ a:hover {
 }
 
 .hero__intro {
+  position: relative;
+  z-index: 1;
   display: grid;
   align-content: center;
   gap: var(--space-8);
@@ -543,10 +541,29 @@ a:hover {
   padding-block-end: var(--space-1);
 }
 
-.hero__fact {
+.hero__accent {
+  display: block;
   color: var(--accent-strong);
-  font-size: 1rem;
+}
+
+/* A tracked label with a hairline rule, like a caption on a spec sheet. */
+.hero__fact {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--accent-strong);
+  font-size: 0.8125rem;
   font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.hero__fact::after {
+  width: 3rem;
+  height: 1px;
+  background: currentColor;
+  content: "";
+  opacity: 0.5;
 }
 
 .action-row {
@@ -568,11 +585,77 @@ a:hover {
 
 .hero-pager {
   position: absolute;
+  z-index: 1;
   inset-block-end: 0;
   inset-inline: 0;
   display: flex;
-  justify-content: center;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+
+.hero-pager__hint {
+  display: flex;
+  align-items: center;
   gap: var(--space-2);
+  color: var(--muted);
+  font-size: var(--text-small);
+}
+
+.hero-pager__hint::before {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 50%;
+  background: var(--accent);
+  content: "";
+}
+
+.hero-pager__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+/* Numbered spreads: a short rule over each number, filled for the open spread. */
+.hero-pager__spread {
+  display: inline-grid;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: var(--text-small);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+  transition: color var(--duration-hover) var(--ease-premium);
+}
+
+.hero-pager__spread::before {
+  display: block;
+  width: 1.75rem;
+  height: 2px;
+  margin-block-end: var(--space-1);
+  border-radius: 1px;
+  background: var(--field-edge);
+  opacity: 0.45;
+  content: "";
+  transition: background-color var(--duration-short) var(--ease-premium);
+}
+
+.hero-pager__spread:hover {
+  color: var(--ink);
+}
+
+.hero-pager__spread[aria-current="true"] {
+  color: var(--accent-strong);
+}
+
+.hero-pager__spread[aria-current="true"]::before {
+  background: var(--accent-strong);
+  opacity: 1;
 }
 
 .hero-pager__button {
@@ -644,7 +727,10 @@ a:hover {
   transition: opacity var(--duration-short) var(--ease-premium);
   /* The rings and light pool fade out with the linen; the canvas runs a header
      height past the hero, so its fade is that much longer. */
-  mask-image: linear-gradient(to bottom, var(--ink) calc(100% - var(--hero-fade) - var(--header-height)), transparent);
+  mask-image:
+    linear-gradient(to bottom, var(--ink) calc(100% - var(--hero-fade) - var(--header-height)), transparent),
+    linear-gradient(to right, transparent calc(var(--canvas-left, 0px) * -0.3), var(--ink) calc(var(--canvas-left, 0px) * -1));
+  mask-composite: intersect;
 }
 
 .hero-stage[data-model-ready="true"] .hero-stage__fallback {
@@ -1468,26 +1554,12 @@ a:hover {
     gap: var(--space-3) var(--space-5);
   }
 
-  .hero__backdrop {
-    display: none;
-  }
-
   .hero-stage {
     flex: 1 1 auto;
     min-height: clamp(17rem, 44svh, 30rem);
     margin-inline: calc(var(--gutter) * -1);
-    isolation: isolate;
-  }
-
-  /* On phones the linen sits behind the book only, fading out at the bottom;
-     a pseudo-element carries it so the pager buttons stay fully opaque. */
-  .hero-stage::before {
-    position: absolute;
-    z-index: -1;
-    inset: 0;
-    background: var(--linen);
-    content: "";
-    mask-image: linear-gradient(to bottom, var(--ink) calc(100% - var(--hero-fade) / 2), transparent);
+    /* Room for the pager under the book (album-scene.js fits the book above it). */
+    padding-block-end: 3.5rem;
   }
 
   .hero-stage__canvas {
@@ -1611,7 +1683,16 @@ a:hover {
   }
 
   .hero__fact {
-    font-size: 1rem;
+    font-size: 0.75rem;
+  }
+
+  .hero__fact::after,
+  .hero-pager__hint {
+    display: none;
+  }
+
+  .hero-pager {
+    justify-content: center;
   }
 
   .action-row {

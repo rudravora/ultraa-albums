@@ -446,13 +446,15 @@ export async function openAlbumScene(canvas, spreads, { reducedMotion = false, o
   // The canvas may extend past the stage (to the edge of the linen ground); the
   // camera still fits the book to the stage and simply sees more table around it.
   const fit = () => {
-    const box = stage.getBoundingClientRect();
+    // The stage's bottom padding is room kept for the pager; the book fits above it.
+    const { top, left, right, bottom: edge } = stage.getBoundingClientRect();
+    const box = { top, left, right, bottom: edge - (parseFloat(getComputedStyle(stage).paddingBottom) || 0) };
     const view = canvas.getBoundingClientRect();
-    const width = Math.max(1, box.width);
-    const height = Math.max(1, box.height);
+    const width = Math.max(1, right - left);
+    const height = Math.max(1, box.bottom - top);
     const aspect = width / height;
     // Portrait stages (phones) get a wider frame so the open spread never clips.
-    const frameWidth = aspect < 1 ? FRAME.width * 1.12 : FRAME.width;
+    const frameWidth = aspect < 1.3 ? FRAME.width * 1.12 : FRAME.width;
     const frameAspect = frameWidth / FRAME.height;
     const viewHeight = aspect > frameAspect ? FRAME.height : frameWidth / aspect;
     const perPixel = viewHeight / height;
