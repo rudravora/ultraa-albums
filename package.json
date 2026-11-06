@@ -1,1 +1,21 @@
-{"name":"ultraa-albums-homepage","private":true,"type":"module","version":"1.0.0","packageManager":"pnpm@11.25.0","engines":{"node":">=22"},"scripts":{"predev":"node scripts/render-home.mjs","dev":"vite --host 0.0.0.0","prebuild":"node scripts/render-home.mjs","build":"vite build","preview":"vite preview --host 0.0.0.0"},"dependencies":{"three":"0.173.0"},"devDependencies":{"vite":"6.1.0"}}
+{
+  "name": "ultraa-albums-homepage",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "packageManager": "pnpm@11.25.0",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "dev": "node scripts/render-home.mjs && vite --host 0.0.0.0",
+    "build": "node scripts/render-home.mjs && vite build",
+    "preview": "vite preview --host 0.0.0.0"
+  },
+  "dependencies": {
+    "three": "0.173.0"
+  },
+  "devDependencies": {
+    "vite": "6.1.0"
+  }
+}
