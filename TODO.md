@@ -1,3 +1,5 @@
+> Status as of 6 Nov 2026: see `HANDOFF.md`.
+
 # TODO
 
 ## Homepage structure and content
@@ -20,5 +22,5 @@
 ## Source truth, project files and validation
 - [ ] Product options are exact and traceable: Luxury covers acrylic/leather/hardcover/linen/wood/canvas; Flush Mount covers photo/acrylic/metal/canvas/linen/leather and pages 1mm standard or 1.5mm extra-thick; Layflat covers acrylic/canvas/linen/leather/photo/metal/wood, a thinner/lighter page block and panoramic two-page spread; Photo Book formats 6×8, 9×12, 12×18 wedding and 5×5 mini; printed photo formats 4×6, 5×7 and 6×8 listed separately. No other exact dimensions or counts.
 - [ ] Deliver runnable working frontend and README, `DESIGN.md` with motion specification, `PRODUCT.md`, and `HANDOFF.md` with decisions, verified sources, stand-in assets, absent tiers/blog, form endpoint guidance, loaded skills, checks and limitations.
-- [ ] Declare only `/` in `public/manus-routes.json`. Register and resolve JavaScript, HTML and CSS diagnostics.
+- [x] Manus route manifest removed (single static route `/`).
 - [ ] Run the checks named in brief section 9; repair every failure. Report any checker that cannot run and its reason. Inspect source rather than judging from assumptions. Include the required 30-law, line-specific UX report with exact score/grade, Critical Issues, Warnings, Suggestions, Compliant, N/A and a prioritized action plan. Run the Better Typography review and the Motion Design quality checklist.

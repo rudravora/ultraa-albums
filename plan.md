@@ -1,3 +1,5 @@
+> Superseded in part: see `HANDOFF.md` for the owner's in-session changes (scroll-driven album, page turns, hero background).
+
 # Homepage redesign plan
 
 **Kind:** physical product + assisted service. **site-kind:** other. **Deliverable:** one responsive, light-mode homepage for Ultraa Albums, not a storefront checkout or live order-processing backend.
@@ -44,7 +46,7 @@ Use semantic HTML, CSS and JavaScript, Vite, and Three.js only for the hero obje
 - `src/main.js`: audience/material/example controls, mobile menu and honest contact states.
 - `src/album-scene.js`: Three.js album geometry, generated page textures, one-time motion and fallback.
 - `public/assets/images`, `public/assets/fonts`: optimized generated stand-ins and self-hosted faces.
-- `public/manus-routes.json`: declares `/`. `DESIGN.md`, `PRODUCT.md`, `README.md`, `HANDOFF.md` document operation and decisions.
+- `DESIGN.md`, `PRODUCT.md`, `README.md`, `HANDOFF.md` document operation and decisions.
 
 ## Source boundaries and decisions
 
@@ -61,10 +63,8 @@ Use semantic HTML, CSS and JavaScript, Vite, and Three.js only for the hero obje
 ```text
 ultraa/
 ├── index.html
-├── app.config.ts
 ├── src/{content.js,main.js,album-scene.js,site.css}
 ├── scripts/render-home.mjs
-├── public/manus-routes.json
 ├── public/assets/{images,fonts}/
 ├── DESIGN.md
 ├── PRODUCT.md

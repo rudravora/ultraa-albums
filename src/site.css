@@ -13,7 +13,7 @@
   font-family: "Newsreader";
   src: url("/assets/fonts/display.woff2") format("woff2");
   font-style: normal;
-  font-weight: 400 500;
+  font-weight: 400;
   font-display: swap;
 }
 
@@ -81,7 +81,6 @@
   --gap-split: clamp(2.5rem, 6vw, 5rem);
   --gap-grid-x: clamp(1rem, 2.4vw, 2rem);
   --gap-grid-y: clamp(2rem, 4vw, 3.5rem);
-  --gap-hero: clamp(1.5rem, 4.5vw, 4rem);
   --gap-nav: clamp(0.75rem, 1.2vw, 1.25rem);
   --space-footer: clamp(3rem, 6vw, 5rem);
   --ease-premium: cubic-bezier(0.4, 0, 0.2, 1);
@@ -444,7 +443,7 @@ a:hover {
   position: absolute;
   inset-block: 0;
   inset-inline-end: 0;
-  inset-inline-start: calc((100% - var(--container)) / 2 + (var(--container) - var(--gap-hero)) * 4.5 / 12 + var(--gap-hero) / 2);
+  inset-inline-start: calc((100% - var(--container)) / 2 + (var(--container) - var(--gap-split)) * 4.5 / 12 + var(--gap-split) / 2);
   background: var(--linen);
 }
 
@@ -454,7 +453,7 @@ a:hover {
   min-height: inherit;
   grid-template-columns: minmax(0, 4.5fr) minmax(0, 7.5fr);
   align-items: stretch;
-  gap: var(--gap-hero);
+  gap: var(--gap-split);
   padding-block: var(--space-6);
 }
 
@@ -770,7 +769,7 @@ a:hover {
 .materials-layout,
 .process-layout {
   display: grid;
-  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  grid-template-columns: minmax(0, 4.5fr) minmax(0, 7.5fr);
   align-items: start;
   gap: var(--gap-split);
 }
@@ -862,7 +861,7 @@ a:hover {
 }
 
 .process-layout {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr);
+  grid-template-columns: minmax(0, 4.5fr) minmax(0, 7.5fr);
 }
 
 .process-copy {
@@ -904,7 +903,7 @@ a:hover {
 
 .services-layout {
   display: grid;
-  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  grid-template-columns: minmax(0, 4.5fr) minmax(0, 7.5fr);
   align-items: start;
   gap: var(--gap-split);
 }
@@ -1108,7 +1107,7 @@ a:hover {
 
 .contact-layout {
   display: grid;
-  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  grid-template-columns: minmax(0, 4.5fr) minmax(0, 7.5fr);
   align-items: start;
   gap: var(--gap-split);
 }

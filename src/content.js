@@ -130,7 +130,7 @@ export const content = {
     },
     materials: {
       id: 'materials',
-      title: 'Cover materials',
+      title: 'Album cover materials',
       legend: 'Cover material',
       items: [
         {
