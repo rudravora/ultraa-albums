@@ -56,11 +56,11 @@ function loadImage(src) {
   return image.decode().then(() => image);
 }
 
-function canvas2d(width, height, { alpha = false } = {}) {
+function canvas2d(width, height) {
   const element = document.createElement('canvas');
   element.width = width;
   element.height = height;
-  const context = element.getContext('2d', { alpha });
+  const context = element.getContext('2d', { alpha: false });
   if (!context) throw new Error('2D canvas unavailable');
   return [element, context];
 }
@@ -197,18 +197,20 @@ function brassCorners(side, centreY, material) {
   });
 }
 
-// A soft pool of warm light on the table under the album (alpha falls off radially).
+// A soft pool of warm light on the table under the album. The falloff is drawn
+// opaque (white to black) and used as an alpha map: a transparent 2D canvas
+// uploads junk colour in its near-clear pixels on Safari, which showed as grain.
 function lightPool() {
-  const [pool, context] = canvas2d(256, 256, { alpha: true });
+  const [pool, context] = canvas2d(256, 256);
   const falloff = context.createRadialGradient(128, 128, 0, 128, 128, 128);
-  falloff.addColorStop(0, 'rgba(255, 255, 255, 1)');
-  falloff.addColorStop(0.55, 'rgba(255, 255, 255, 0.45)');
-  falloff.addColorStop(1, 'rgba(255, 255, 255, 0)');
+  falloff.addColorStop(0, '#fff');
+  falloff.addColorStop(0.55, 'rgb(115, 115, 115)');
+  falloff.addColorStop(1, '#000');
   context.fillStyle = falloff;
   context.fillRect(0, 0, 256, 256);
   const texture = new CanvasTexture(pool);
   const mesh = new Mesh(new PlaneGeometry(6.4, 5), new MeshBasicMaterial({
-    color: new Color(cssValue('--light-pool')), map: texture, transparent: true, depthWrite: false, toneMapped: false,
+    color: new Color(cssValue('--light-pool')), alphaMap: texture, transparent: true, depthWrite: false, toneMapped: false,
   }));
   mesh.rotation.x = -Math.PI / 2;
   mesh.position.y = -0.002;
