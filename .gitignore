@@ -3,11 +3,7 @@ dist/
 .env
 .env.*
 !.env.example
-.taste-skill/
-.hallmark/
-.impeccable/
 index.html
-.hallmark/shots/
 screenshots/
 .DS_Store
 .vercel

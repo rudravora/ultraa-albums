@@ -1,14 +1,3 @@
-/* Hallmark · shape: Product catalogue · genre: editorial · theme: Atelier (dealt in the Manus run) · job: buy · draw: manual
- * hero: product stage, the album opens with scroll (owner override of the no-scroll rule) · nav: edge-aligned logo, links, Pay online, one action · footer: four link columns under the logo and catalog link · imagery: the product (Three.js render) and generated stand-in photographs · signature: the leather album opening to a full-bleed wedding spread
- * axes: light/roman-serif/warm · posture: restrained · surface: absolute · contrast: pass · fold: pass · v2.0.0 */
-/* Hallmark · pre-emit critique: P4 H4 E4 S4 R4 V3 · weakest: V, the section order is a familiar catalogue run; the hero album, the material swap and the real-format table carry the specificity */
-/* Hallmark · waive 7b · --surface #ffffff is pinned by the client brief token block · the brief names the white surface for header, form and footer bands */
-/* Hallmark · dismissed 11 · the brief requires album photographs to zoom 1.02 inside their clipped frame on hover */
-/* Hallmark · dismissed 42 · the brief lists the footer as album products, services, support and legal columns */
-/* Hallmark · answered F7 · the shared recipe is the segmented and swatch controls, one control family by design */
-/* Hallmark · dismissed 58 · the 90-word screen is the album options table, published specs that cannot be cut further */
-/* Hallmark · waive 44c · the album sits below the copy's centre line on purpose · the cover swings up as it opens and needs headroom above the book */
-/* Hallmark · answered F15 · the album grid and the contact form use their own gaps; every two-column split shares --gap-split */
 @font-face {
   font-family: "Newsreader";
   src: url("/assets/fonts/display.woff2") format("woff2");
