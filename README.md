@@ -44,7 +44,19 @@ The endpoint must accept `multipart/form-data` POSTs, allow CORS from the site's
 
 ## Replacing stand-in images
 
-Every photograph is a generated stand-in (listed in `HANDOFF.md`). Replace files in place, keeping names and the `-480`, `-800`, `-1200` widths. For the editing slider, each example is a pair: `editing-0N-before-*.webp` and `editing-0N-after-*.webp`.
+Every photograph is a generated stand-in, not Ultraa's work. Replace files in place, keeping names and the `-480`, `-800`, `-1200` widths. For the editing slider, each example is a pair: `editing-0N-before-*.webp` and `editing-0N-after-*.webp`.
+
+| Files (`public/assets/images/`) | What it is | Where it shows |
+| --- | --- | --- |
+| `luxury-cover-*`, `flush-mount-*`, `layflat-spread-*`, `photo-book-*` | Generated product photos | Album formats grid |
+| `material-leather-*`, `-linen-*`, `-acrylic-*`, `-canvas-*` | Generated cover close-ups | Cover materials |
+| `design-proofs-*` | Generated worktable photo | How it works |
+| `editing-01/02/03-after-*` | Generated fictional wedding photos | Before/after slider; the 3D album's pages |
+| `editing-01/02/03-before-*` | Each "after" with lower contrast and saturation, cooler and darker; not a real unedited frame | Before/after slider |
+| `album-closed-*`, `album-open-*` | Stills rendered from the Three.js album | Hero fallback without WebGL or JavaScript |
+| `../ultraa-logo.png` | Official logo, only 213×71 px, soft on high-DPI screens | Header, footer, favicon |
+
+Most useful to get from Ultraa: real album photographs (closed, open spread, edge, cover close-ups), three real before/after edit pairs, and a vector or 2× logo.
 
 ## Research
 
