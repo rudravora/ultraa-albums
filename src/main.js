@@ -14,7 +14,8 @@ function setAudience(id) {
   const next = content.hero.audiences.find((item) => item.id === id);
   if (!next || next.id === currentAudience.id) return;
   currentAudience = next;
-  title.textContent = next.title;
+  title.firstChild.textContent = `${next.title} `;
+  title.lastElementChild.textContent = next.accent;
   sentence.textContent = next.sentence;
   html.dataset.audience = next.id;
 
@@ -292,6 +293,7 @@ const hero = heroStage?.closest('.hero');
 const heroInner = hero?.querySelector('.hero__inner');
 const pager = document.querySelector('[data-hero-pager]');
 const pageButtons = [...(pager?.querySelectorAll('[data-page-step]') ?? [])];
+const spreadButtons = [...(pager?.querySelectorAll('[data-spread-index]') ?? [])];
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
 // Scroll only opens and closes the book: while the hero is pinned, scrolling down
@@ -315,6 +317,10 @@ function syncBookState() {
   const open = albumController.opened > 0.5;
   pageButtons[0].disabled = !open || spread <= 0;
   pageButtons[1].disabled = open && spread >= albumController.lastSpread;
+  for (const [index, button] of spreadButtons.entries()) {
+    if (open && index === spread) button.setAttribute('aria-current', 'true');
+    else button.removeAttribute('aria-current');
+  }
   canvas.setAttribute('aria-label', open ? content.hero.spreads[spread].alt : content.hero.fallbackAlt);
 }
 
@@ -427,6 +433,7 @@ async function startAlbumScene() {
     window.addEventListener('scroll', () => followScroll(), { passive: true });
     window.addEventListener('resize', () => followScroll(), { passive: true });
     for (const button of pageButtons) button.addEventListener('click', () => step(Number(button.dataset.pageStep)));
+    for (const button of spreadButtons) button.addEventListener('click', () => goToSpread(Number(button.dataset.spreadIndex)));
     pager.hidden = false;
     enablePointerTurns();
   } catch {

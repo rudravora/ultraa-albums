@@ -182,7 +182,7 @@ const h = `<!doctype html>
             <div class="audience-switch" role="group" aria-label="${html(c.hero.audienceControl)}">
               ${c.hero.audiences.map((audience, index) => `<button type="button" class="audience-switch__choice${index === 0 ? ' is-selected' : ''}" data-audience-choice="${html(audience.id)}" aria-pressed="${index === 0}">${html(audience.label)}</button>`).join('')}
             </div>
-            <h1 id="hero-title" data-hero-title>${html(c.hero.audiences[0].title)}</h1>
+            <h1 id="hero-title" data-hero-title>${html(c.hero.audiences[0].title)} <span class="hero__accent">${html(c.hero.audiences[0].accent)}</span></h1>
             <p class="hero__sentence" data-hero-sentence>${html(c.hero.audiences[0].sentence)}</p>
           </div>
           <div class="hero__actions">
@@ -197,8 +197,12 @@ const h = `<!doctype html>
           <img class="hero-stage__fallback" data-hero-fallback src="${html(c.hero.fallbackImage)}" srcset="${html(c.hero.fallbackSrcset)}" sizes="(max-width: 75rem) 100vw, 75rem" width="1400" height="1159" alt="${html(c.hero.fallbackAlt)}" loading="eager" fetchpriority="high" decoding="async">
           <canvas class="hero-stage__canvas" data-hero-canvas aria-hidden="true" role="img" aria-label="${html(c.hero.spreads[0].alt)}"></canvas>
           <div class="hero-pager" data-hero-pager hidden>
-            <button class="hero-pager__button" type="button" data-page-step="-1" aria-label="${html(c.hero.previousPage)}"><svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M12.5 4.5 7 10l5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-            <button class="hero-pager__button" type="button" data-page-step="1" aria-label="${html(c.hero.nextPage)}"><svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M7.5 4.5 13 10l-5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <p class="hero-pager__hint">${html(c.hero.turnHint)}</p>
+            <div class="hero-pager__controls">
+              <button class="hero-pager__button" type="button" data-page-step="-1" aria-label="${html(c.hero.previousPage)}"><svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M12.5 4.5 7 10l5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              ${c.hero.spreads.map((_, index) => `<button class="hero-pager__spread" type="button" data-spread-index="${index}" aria-label="${html(c.hero.spreadLabel)} ${String(index + 1).padStart(2, '0')}">${String(index + 1).padStart(2, '0')}</button>`).join('')}
+              <button class="hero-pager__button" type="button" data-page-step="1" aria-label="${html(c.hero.nextPage)}"><svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M7.5 4.5 13 10l-5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            </div>
           </div>
         </figure>
       </div>
