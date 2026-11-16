@@ -1,6 +1,6 @@
-# Ultraa Albums homepage
+# Ultraa Albums website
 
-A light-mode, single-page homepage for Ultraa Albums, built with semantic HTML, CSS, vanilla JavaScript, Vite and Three.js (the hero album only). Static output; no server or database.
+The Ultraa Albums site: React 18, Vite, Tailwind CSS and React Router, with a Three.js album in the home hero. Every page is prerendered to static HTML at build time, so content shows without waiting for JavaScript. Layout and design tokens follow the Parmar Properties main-site (black and white, Instrument Sans).
 
 Needs Node 22 or newer and pnpm (the version is pinned in `package.json`; `corepack enable` provides it).
 
@@ -11,24 +11,26 @@ pnpm install --frozen-lockfile
 pnpm dev        # http://localhost:3000, live reload
 ```
 
-Build and serve the production files:
+Build the production files:
 
 ```sh
-pnpm build      # writes dist/
-pnpm preview    # serves dist/ on http://localhost:3000
+pnpm build      # type-checks, builds dist/, then prerenders every page into it
+npx serve dist  # serves dist/ with clean URLs (/about-us → about-us.html), as Vercel does
 ```
 
-`pnpm dev` and `pnpm build` first run `scripts/render-home.mjs`, which writes `index.html` from `src/content.js`. `index.html` is generated, so it is git-ignored: edit `src/content.js` or the script, never the HTML. The page is complete without JavaScript; scripts add the 3D album, the controls, the scroll motion and the form handling.
+`pnpm preview` (Vite's own server) does not map clean URLs, so use `serve` to check pages other than the home page.
 
 ## Where things live
 
-- `src/content.js`: all copy, links, product data and image paths.
-- `scripts/render-home.mjs`: the static, accessible markup.
-- `src/site.css`: design tokens (`:root`), layout, states, motion and user-preference queries.
-- `src/main.js`: audience switch, material and editing controls, mobile menu, contact form, scroll motion.
+- `src/content/site.ts`: brand, contacts, navigation and the page list (paths match the live ultraaalbums.com URLs).
+- `src/App.tsx`: the routes, shared by the browser app and the prerender.
+- `src/components/`: header (top bar, navigation, mobile menu), footer, page shell, buttons and floating WhatsApp/back-to-top buttons.
+- `src/pages/`: page components.
+- `src/styles.css` and `tailwind.config.js`: design tokens (copied from the Parmar main-site) and base styles.
+- `src/entry-server.tsx` and `scripts/prerender.mjs`: build-time rendering of every page, plus `404.html`, `sitemap.xml` and `robots.txt`.
 - `src/album-scene.js`: the Three.js album (geometry, page textures, the scroll-driven opening).
-- `public/assets/images`: WebP images. `album-closed-*` and `album-open-*` are stills rendered from the same Three.js scene and shown when WebGL or JavaScript is unavailable.
-- `public/assets/fonts`: self-hosted Newsreader (display) and Hanken Grotesk (text).
+- `public/assets/images`: WebP images. `album-closed-*` and `album-open-*` are stills rendered from the Three.js scene.
+- Instrument Sans is self-hosted through `@fontsource-variable/instrument-sans`; no font CDN.
 
 ## Contact form
 
