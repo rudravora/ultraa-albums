@@ -8,7 +8,7 @@ import { AppRoutes } from "@/App";
 const container = document.getElementById("app")!;
 const app = (
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AppRoutes />
     </BrowserRouter>
   </StrictMode>

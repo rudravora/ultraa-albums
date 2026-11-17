@@ -26,6 +26,27 @@
     --ring: 215 20.2% 65.1%;
     --radius: 0.5rem;
     color-scheme: light;
+
+    /* Height of the fixed top bar (36px) plus the header (64px, 75px from md). */
+    --chrome: 100px;
+
+    /* 3D album colours, read by src/album-scene.js. Black and white with silver metal. */
+    --album-leather: #0a0a0a;
+    --album-sheen: #3c3c3c;
+    --album-foil: #cfcfcf;
+    --album-brass: #a7a7a7;
+    --album-paper: #f8f7f4;
+    --album-edge: #d4d4d4;
+    --album-line: #e2e2e2;
+    --album-surface: #ffffff;
+    --album-orbit: #8f8f8f;
+    --album-light: #ffffff;
+  }
+
+  @media (min-width: 768px) {
+    :root {
+      --chrome: 111px;
+    }
   }
 
   * {
@@ -35,6 +56,24 @@
   body {
     @apply bg-background text-foreground font-instrument_sans antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Hero canvas: the rings fade out at the bottom and towards the text (left on wide
+   screens, top when stacked). --stage-x / --stage-y are set by Hero.tsx. */
+.hero-canvas {
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 6rem), transparent),
+    linear-gradient(to right, transparent calc(var(--stage-x, 0px) * 0.3), #000 var(--stage-x, 0px));
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 6rem), transparent),
+    linear-gradient(to right, transparent calc(var(--stage-x, 0px) * 0.3), #000 var(--stage-x, 0px));
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+
+@media (max-width: 1023px) {
+  .hero-canvas {
+    -webkit-mask-image: linear-gradient(to bottom, transparent calc(var(--stage-y, 0px) * 0.4), #000 var(--stage-y, 0px), #000 calc(100% - 4rem), transparent);
+    mask-image: linear-gradient(to bottom, transparent calc(var(--stage-y, 0px) * 0.4), #000 var(--stage-y, 0px), #000 calc(100% - 4rem), transparent);
   }
 }
 

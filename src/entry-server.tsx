@@ -7,7 +7,7 @@ export { pages, site } from "@/content/site";
 
 export const render = (path: string) =>
   renderToString(
-    <StaticRouter location={path}>
+    <StaticRouter location={path} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AppRoutes />
     </StaticRouter>,
   );

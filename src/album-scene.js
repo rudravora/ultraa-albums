@@ -77,7 +77,7 @@ function drawCover(context, image, x, y, width, height, focus = [0.5, 0.5], zoom
 
 function blankPage() {
   const [page, context] = canvas2d(TEXTURE.width, TEXTURE.height);
-  context.fillStyle = cssValue('--page-paper');
+  context.fillStyle = cssValue('--album-paper');
   context.fillRect(0, 0, page.width, page.height);
   return [page, context];
 }
@@ -89,7 +89,7 @@ function paintPage(spec, images) {
   const margin = Math.round(width * 0.1);
   const frame = (x, y, w, h, item) => {
     drawCover(context, images.get(item.src), x, y, w, h, item.focus, item.zoom);
-    context.strokeStyle = cssValue('--border');
+    context.strokeStyle = cssValue('--album-line');
     context.lineWidth = 2;
     context.strokeRect(x, y, w, h);
   };
@@ -134,9 +134,9 @@ function toTexture(canvas, { mirrored = false } = {}) {
 // Fine horizontal lines for the stacked page edges.
 function pageEdgeTexture() {
   const [edge, context] = canvas2d(8, 128);
-  context.fillStyle = cssValue('--page-paper');
+  context.fillStyle = cssValue('--album-paper');
   context.fillRect(0, 0, 8, 128);
-  context.fillStyle = cssValue('--page-edge');
+  context.fillStyle = cssValue('--album-edge');
   for (let y = 0; y < 128; y += 4) context.fillRect(0, y, 8, 1);
   const texture = new CanvasTexture(edge);
   texture.colorSpace = SRGBColorSpace;
@@ -210,7 +210,7 @@ function lightPool() {
   context.fillRect(0, 0, 256, 256);
   const texture = new CanvasTexture(pool);
   const mesh = new Mesh(new PlaneGeometry(6.4, 5), new MeshBasicMaterial({
-    color: new Color(cssValue('--light-pool')), alphaMap: texture, transparent: true, depthWrite: false, toneMapped: false,
+    color: new Color(cssValue('--album-light')), alphaMap: texture, transparent: true, depthWrite: false, toneMapped: false,
   }));
   mesh.rotation.x = -Math.PI / 2;
   mesh.position.y = -0.002;
@@ -224,7 +224,7 @@ function orbit(radius, { dashed = false, opacity = 0.5 } = {}) {
     const t = (i / 256) * Math.PI * 2;
     return new Vector3(Math.cos(t) * radius, 0, Math.sin(t) * radius);
   });
-  const colour = new Color(cssValue('--orbit'));
+  const colour = new Color(cssValue('--album-orbit'));
   const material = dashed
     ? new LineDashedMaterial({ color: colour, dashSize: 0.045, gapSize: 0.05, transparent: true, opacity })
     : new LineBasicMaterial({ color: colour, transparent: true, opacity });
@@ -244,7 +244,7 @@ function coverStitching(y) {
   const points = corners.flatMap((point, index) => [point, corners[(index + 1) % 4]]);
   const line = new LineSegments(
     new BufferGeometry().setFromPoints(points),
-    new LineDashedMaterial({ color: new Color(cssValue('--page-edge')), dashSize: 0.022, gapSize: 0.018, transparent: true, opacity: 0.55 }),
+    new LineDashedMaterial({ color: new Color(cssValue('--album-edge')), dashSize: 0.022, gapSize: 0.018, transparent: true, opacity: 0.55 }),
   );
   line.computeLineDistances();
   return line;
@@ -341,8 +341,8 @@ export async function openAlbumScene(canvas, spreads, { reducedMotion = false, o
   scene.environmentIntensity = 0.36;
   pmrem.dispose();
 
-  scene.add(new HemisphereLight(new Color(cssValue('--surface')), new Color(cssValue('--border')), 1.05));
-  const key = new DirectionalLight(new Color(cssValue('--surface')), 2.2);
+  scene.add(new HemisphereLight(new Color(cssValue('--album-surface')), new Color(cssValue('--album-line')), 1.05));
+  const key = new DirectionalLight(new Color(cssValue('--album-surface')), 2.2);
   key.position.set(-2.6, 6.5, 2.2);
   key.castShadow = true;
   key.shadow.mapSize.set(2048, 2048);
@@ -358,17 +358,17 @@ export async function openAlbumScene(canvas, spreads, { reducedMotion = false, o
 
   const bump = leatherBump();
   const leather = new MeshPhysicalMaterial({
-    color: new Color(cssValue('--cover-leather')), roughness: 0.6, metalness: 0, bumpMap: bump, bumpScale: 0.5,
-    clearcoat: 0.2, clearcoatRoughness: 0.5, sheen: 0.35, sheenRoughness: 0.6, sheenColor: new Color(cssValue('--cover-sheen')),
+    color: new Color(cssValue('--album-leather')), roughness: 0.6, metalness: 0, bumpMap: bump, bumpScale: 0.5,
+    clearcoat: 0.2, clearcoatRoughness: 0.5, sheen: 0.35, sheenRoughness: 0.6, sheenColor: new Color(cssValue('--album-sheen')),
   });
-  const paper = new MeshStandardMaterial({ color: new Color(cssValue('--page-paper')), roughness: 0.95 });
+  const paper = new MeshStandardMaterial({ color: new Color(cssValue('--album-paper')), roughness: 0.95 });
   // Gilded page edges: gold leaf over the stacked-page lines.
   const edgeLines = pageEdgeTexture();
   const edge = new MeshStandardMaterial({
-    color: new Color(cssValue('--foil')), metalness: 0.85, roughness: 0.38, bumpMap: edgeLines, bumpScale: 0.4,
+    color: new Color(cssValue('--album-foil')), metalness: 0.85, roughness: 0.38, bumpMap: edgeLines, bumpScale: 0.4,
   });
-  const foil = new MeshStandardMaterial({ color: new Color(cssValue('--foil')), metalness: 1, roughness: 0.3, side: FrontSide });
-  const brass = new MeshStandardMaterial({ color: new Color(cssValue('--brass')), metalness: 1, roughness: 0.28 });
+  const foil = new MeshStandardMaterial({ color: new Color(cssValue('--album-foil')), metalness: 1, roughness: 0.3, side: FrontSide });
+  const brass = new MeshStandardMaterial({ color: new Color(cssValue('--album-brass')), metalness: 1, roughness: 0.28 });
   // BoxGeometry material order: +x, -x, +y, -y, +z, -z.
   const blockMaterials = [edge, edge, paper, paper, edge, edge];
   const print = (canvasImage, options = {}) => new MeshStandardMaterial({
