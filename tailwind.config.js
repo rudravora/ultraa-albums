@@ -47,6 +47,7 @@ export default {
       },
       fontFamily: {
         sans: ['"Instrument Sans Variable"', "ui-sans-serif", "system-ui", "sans-serif"],
+        bebas: ["\"Bebas Neue\"", "sans-serif"],
         instrument_sans: ['"Instrument Sans Variable"', "ui-sans-serif", "system-ui", "sans-serif"],
       },
       keyframes: {

@@ -60,6 +60,22 @@ Every photograph is a generated stand-in, not Ultraa's work. Replace files in pl
 
 Most useful to get from Ultraa: real album photographs (closed, open spread, edge, cover close-ups), three real before/after edit pairs, and a vector or 2× logo.
 
+### Stock photographs
+
+The home sections use photos from [Unsplash](https://unsplash.com) under the [Unsplash License](https://unsplash.com/license) (free for commercial use, no permission needed). They are placeholders until Ultraa supplies its own. Files are in `public/assets/images/stock/`.
+
+| File | Photographer |
+| --- | --- |
+| `album-browse-*` | Harry Borrett |
+| `album-open-*` | Mockaroon |
+| `photo-book-*`, `design-layout-*` | Kristyna Squared.one |
+| `bride-*` | Alok Verma |
+| `couple-bw-*` | Hisu lee |
+| `editing-*` | Zulfugar Karimov |
+| `photographer-*` | Micah & Sammie Chaffin |
+| `camera-*` | Ailbhe Flynn |
+| `couple-path-*` | iKshana Productions |
+
 ## Research
 
 The earlier website research (Ultraa Albums and Zno) that was this repository's original README is in [docs/website-intelligence-report.md](docs/website-intelligence-report.md).

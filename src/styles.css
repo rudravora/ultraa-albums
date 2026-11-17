@@ -77,6 +77,61 @@
   }
 }
 
+/* Reveal (motion.tsx): hidden only once JS has marked <html class="js">. */
+[data-reveal] {
+  transition: opacity 1.2s cubic-bezier(0.22, 1, 0.36, 1), transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.js [data-reveal]:not(.is-in) {
+  opacity: 0;
+}
+.js [data-reveal="up"]:not(.is-in) {
+  transform: translateY(60px) scale(0.97);
+}
+.js [data-reveal="left"]:not(.is-in) {
+  transform: translateX(80px) scale(0.98);
+}
+.js [data-reveal="right"]:not(.is-in) {
+  transform: translateX(-80px) scale(0.98);
+}
+
+/* ScrubText (motion.tsx): the coloured word is drawn from data-text over its base copy. */
+.scrub-word {
+  position: relative;
+  display: inline-block;
+  white-space: nowrap;
+}
+.scrub-fg {
+  position: absolute;
+  inset: 0 auto auto 0;
+}
+.scrub-fg::before {
+  content: attr(data-text);
+}
+.js [data-scrub] .scrub-fg {
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.8s ease-in-out;
+  transition-delay: min(calc(var(--i) * 35ms), 1600ms);
+}
+.js [data-scrub].is-in .scrub-fg {
+  clip-path: inset(0);
+}
+
+/* Outlined marquee text (Parmar MarqueeSection). */
+.text-outline {
+  color: transparent;
+  -webkit-text-stroke: 1px #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .js [data-scrub] .scrub-fg {
+    clip-path: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
