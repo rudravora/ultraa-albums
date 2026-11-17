@@ -62,7 +62,7 @@ Most useful to get from Ultraa: real album photographs (closed, open spread, edg
 
 ### Stock photographs
 
-The home sections use photos from [Unsplash](https://unsplash.com) under the [Unsplash License](https://unsplash.com/license) (free for commercial use, no permission needed). They are placeholders until Ultraa supplies its own. Files are in `public/assets/images/stock/`.
+The home sections and product pages use photos from [Unsplash](https://unsplash.com) under the [Unsplash License](https://unsplash.com/license) (free for commercial use, no permission needed). They are placeholders until Ultraa supplies its own. Files are in `public/assets/images/stock/`.
 
 | File | Photographer |
 | --- | --- |
@@ -75,6 +75,8 @@ The home sections use photos from [Unsplash](https://unsplash.com) under the [Un
 | `photographer-*` | Micah & Sammie Chaffin |
 | `camera-*` | Ailbhe Flynn |
 | `couple-path-*` | iKshana Productions |
+| `product-flush-mount-*`, `product-layflat-*`, `product-luxury-*`, `product-box-*` | Arun Prakash |
+| `product-slip-in-*` | Laura Fuhrman |
 
 ## Research
 
