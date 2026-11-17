@@ -15,6 +15,15 @@
       ]
     }
   ],
+  "redirects": [
+    { "source": "/flush-mount-album-for-uk", "destination": "/flush-mount-album", "permanent": true },
+    { "source": "/luxury-albums-for-uk", "destination": "/luxury-albums", "permanent": true },
+    { "source": "/box-and-bags-for-uk", "destination": "/box-and-bags", "permanent": true },
+    { "source": "/slip-in-albums-for-uk", "destination": "/slip-in-albums", "permanent": true },
+    { "source": "/image-editing-for-uk", "destination": "/image-editing", "permanent": true },
+    { "source": "/photo-book-for-uk", "destination": "/photo-book", "permanent": true },
+    { "source": "/photography-for-uk", "destination": "/photography", "permanent": true }
+  ],
   "cleanUrls": true,
   "trailingSlash": false
 }
