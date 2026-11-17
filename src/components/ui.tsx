@@ -25,7 +25,7 @@ export const PageShell = ({ breadcrumbs, children }: { breadcrumbs?: Crumb[]; ch
     <div className="min-h-screen bg-[#f3f1ed] text-black overflow-x-clip selection:bg-black selection:text-white flex flex-col">
       <main id="main-content" className="flex-1 pt-[130px] md:pt-[170px] pb-16 md:pb-24 px-6 md:px-16 w-full max-w-[1920px] mx-auto">
         {breadcrumbs && (
-          <nav aria-label="Breadcrumb" className="mb-8 text-[12px] font-medium uppercase tracking-widest text-black/40">
+          <nav aria-label="Breadcrumb" className="mb-8 text-[12px] font-medium uppercase tracking-widest text-black/60">
             <ol className="flex flex-wrap items-center gap-2">
               <li><Link to="/" className="hover:text-black">Home</Link></li>
               {breadcrumbs.map((c) => (
@@ -74,6 +74,7 @@ export const FloatingButtons = () => {
   const state = shown ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10 pointer-events-none invisible";
   return (
     <>
+      <aside aria-label="Quick actions">
       <a
         href={site.whatsapp}
         target="_blank"
@@ -95,6 +96,7 @@ export const FloatingButtons = () => {
           <path d="m18 15-6-6-6 6" />
         </svg>
       </button>
+      </aside>
     </>
   );
 };

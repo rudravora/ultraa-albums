@@ -29,7 +29,7 @@ export const Footer = () => {
         <div className="w-full max-w-[1920px] mx-auto px-6 md:px-16 pt-16 pb-8">
           <div className="flex flex-col lg:flex-row justify-between items-start gap-10 mb-20">
             <div className="flex flex-col w-full">
-              <Link to="/" aria-label={`${site.name} home`} className="flex flex-col items-start transition-opacity hover:opacity-80 mb-6">
+              <Link to="/" className="flex flex-col items-start transition-opacity hover:opacity-80 mb-6">
                 <span className="text-[72px] md:text-[120px] font-bold tracking-tight leading-[1.1]">ULTRAA</span>
                 <span className="text-[24px] md:text-[36px] font-medium tracking-[0.3em] text-white/70 leading-[1.1] mt-1">ALBUMS</span>
               </Link>

@@ -15,9 +15,9 @@ export const AboutPage = () => (
   <PageShell breadcrumbs={[{ name: "About Us" }]}>
     <section className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-8 lg:gap-12 items-center pb-12 border-b border-black/5">
       <div>
-        <h1 className="text-xs md:text-sm font-semibold tracking-[0.15em] uppercase text-black/40 mb-6">{about.label}</h1>
+        <h1 className="text-xs md:text-sm font-semibold tracking-[0.15em] uppercase text-black/60 mb-6">{about.label}</h1>
         <p className="text-[48px] md:text-[64px] lg:text-[80px] font-normal tracking-[-0.04em] max-w-[800px] mb-8 leading-[0.95]">
-          {about.statement[0]} <span className="text-black/40">{about.statement[1]}</span>
+          {about.statement[0]} <span className="text-black/50">{about.statement[1]}</span>
         </p>
         <p className="text-[18px] md:text-[22px] font-medium tracking-[-0.03em] leading-[1.3] text-black/60 max-w-[560px]">{about.intro}</p>
       </div>
@@ -50,7 +50,7 @@ export const AboutPage = () => (
             </div>
             <div>
               <h3 className="text-[26px] font-semibold tracking-[-0.03em]">{person.name}</h3>
-              <p className="text-sm uppercase tracking-widest text-black/40 mt-1">{person.role}</p>
+              <p className="text-sm uppercase tracking-widest text-black/60 mt-1">{person.role}</p>
             </div>
           </Reveal>
         ))}
@@ -131,7 +131,7 @@ export const ContactPage = () => {
   const field = (name: keyof typeof f.labels, props: { type?: string; autoComplete?: string; required?: boolean; textarea?: boolean } = {}) => (
     <div className="flex flex-col gap-2">
       <label htmlFor={`contact-${name}`} className="text-sm font-semibold">
-        {f.labels[name]}{props.required && <span className="text-black/40"> (required)</span>}
+        {f.labels[name]}{props.required && <span className="text-black/60"> (required)</span>}
       </label>
       {props.textarea ? (
         <textarea id={`contact-${name}`} name={name} rows={5} required={props.required} aria-invalid={!!errors[name]} aria-describedby={errors[name] ? `contact-${name}-error` : undefined} className="w-full border border-black/20 bg-white px-4 py-3 text-base rounded-lg focus:outline-none focus:border-black" />
@@ -154,26 +154,26 @@ export const ContactPage = () => {
           </div>
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-8 mt-4">
             <div>
-              <dt className="text-xs font-semibold uppercase tracking-[0.15em] text-black/40 mb-2">Workshop</dt>
+              <dt className="text-xs font-semibold uppercase tracking-[0.15em] text-black/60 mb-2">Workshop</dt>
               <dd>
                 <address className="not-italic text-[16px] leading-[1.6]">{site.address}</address>
                 <a href={site.mapsUrl} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-sm underline underline-offset-2 text-black/60 hover:text-black">Get directions</a>
               </dd>
             </div>
             <div>
-              <dt className="text-xs font-semibold uppercase tracking-[0.15em] text-black/40 mb-2">Phone</dt>
+              <dt className="text-xs font-semibold uppercase tracking-[0.15em] text-black/60 mb-2">Phone</dt>
               <dd className="flex flex-col gap-1 text-[16px]">
                 {site.phones.map((p) => <a key={p.href} href={p.href} className="hover:underline">{p.label}</a>)}
               </dd>
             </div>
             <div>
-              <dt className="text-xs font-semibold uppercase tracking-[0.15em] text-black/40 mb-2">Email</dt>
+              <dt className="text-xs font-semibold uppercase tracking-[0.15em] text-black/60 mb-2">Email</dt>
               <dd className="flex flex-col gap-1 text-[16px]">
                 {site.emails.map((e) => <a key={e} href={`mailto:${e}`} className="hover:underline break-all">{e}</a>)}
               </dd>
             </div>
             <div>
-              <dt className="text-xs font-semibold uppercase tracking-[0.15em] text-black/40 mb-2">Messenger</dt>
+              <dt className="text-xs font-semibold uppercase tracking-[0.15em] text-black/60 mb-2">Messenger</dt>
               <dd className="text-[16px]"><a href={site.messenger} target="_blank" rel="noopener noreferrer" className="hover:underline">Message on Messenger</a></dd>
             </div>
           </dl>

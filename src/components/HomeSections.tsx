@@ -86,6 +86,8 @@ const AboutSection = () => (
       <Reveal from="left" delay={500}>
         <img
           src={about.image.src}
+          width={800}
+          height={534}
           alt=""
           loading="lazy"
           decoding="async"
@@ -122,7 +124,7 @@ const ProcessSection = () => (
               delay={i * 120}
               className={`flex flex-col md:flex-row items-start md:items-baseline py-8 md:py-10 border-white/20 ${i === 0 ? "border-t" : ""} ${i < process.steps.length - 1 ? "border-b" : ""}`}
             >
-              <span className="text-white/40 text-sm tracking-widest mb-4 md:mb-0 md:mr-8 md:w-8 shrink-0">{step.number}</span>
+              <span className="text-white/60 text-sm tracking-widest mb-4 md:mb-0 md:mr-8 md:w-8 shrink-0">{step.number}</span>
               <span className="text-2xl md:text-[32px] md:leading-[1.1] font-medium tracking-tight">
                 <span className="text-white">{step.title}</span> <span className="text-white/40">{step.description}</span>
               </span>
@@ -187,7 +189,7 @@ const ServicesSection = () => (
     </ul>
     <Reveal className={`${container} flex flex-col items-start mt-16 md:mt-24`}>
       <p className="text-white text-2xl md:text-3xl lg:text-[40px] font-medium leading-normal tracking-tight max-w-3xl mb-12">
-        {services.closing.lead} <span className="text-white/40">{services.closing.muted}</span>
+        {services.closing.lead} <span className="text-white/50">{services.closing.muted}</span>
       </p>
       <Link to={services.action.href} className="inline-flex items-center justify-center gap-3 border border-white/30 text-white hover:bg-white hover:text-black px-8 py-4 rounded-full font-medium text-sm transition-colors duration-300">
         {services.action.label} <ArrowIcon />
@@ -238,7 +240,7 @@ const ExpertiseSection = () => (
         </h2>
         <Reveal delay={150}>
           <p className="text-[22px] leading-[1.3] md:text-[21px] font-medium tracking-[-0.03em]">
-            {expertise.lead} <span className="text-white/40">{expertise.muted}</span>
+            {expertise.lead} <span className="text-white/50">{expertise.muted}</span>
           </p>
         </Reveal>
       </div>

@@ -89,7 +89,7 @@ const PhoneIcon = () => (
 
 /** A slim black bar with the fact and contacts; it stays pinned with the header. */
 const TopBar = () => (
-  <div className="fixed top-0 inset-x-0 z-[101] bg-[#111111] text-white/85 text-[12px] md:text-[13px] tracking-wide">
+  <aside aria-label="Contact details" className="fixed top-0 inset-x-0 z-[101] bg-[#111111] text-white/85 text-[12px] md:text-[13px] tracking-wide">
     <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 md:px-10 lg:px-16 h-9 flex items-center justify-between gap-4">
       <p>{site.fact}</p>
       <div className="flex items-center gap-6">
@@ -100,7 +100,7 @@ const TopBar = () => (
         </a>
       </div>
     </div>
-  </div>
+  </aside>
 );
 
 export const Header = () => {

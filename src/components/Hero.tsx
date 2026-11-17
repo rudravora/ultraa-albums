@@ -250,7 +250,7 @@ export const Hero = () => {
               ))}
             </div>
             <h1 id="hero-title" className="text-[40px] sm:text-[48px] lg:text-[clamp(44px,3.9vw,72px)] font-bold leading-[1.05] tracking-[-0.04em] max-w-[14ch]">
-              {audience.title} <span className="text-black/40">{audience.accent}</span>
+              {audience.title} <span className="text-black/50">{audience.accent}</span>
             </h1>
             <p className="mt-5 md:mt-6 max-w-[40ch] text-base md:text-lg text-black/70 leading-relaxed">{audience.sentence}</p>
             <div className="mt-7 md:mt-9 flex flex-wrap gap-3">
@@ -261,9 +261,9 @@ export const Hero = () => {
 
           {hero.steps.map((s, i) => (
             <div key={s.title} aria-hidden={step !== i + 1} className={`[grid-area:1/1] self-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${shown(i + 1)}`}>
-              <p className="text-[13px] font-semibold tracking-widest text-black/40 mb-5">0{i + 2}</p>
+              <p className="text-[13px] font-semibold tracking-widest text-black/60 mb-5">0{i + 2}</p>
               <h2 className="text-[36px] sm:text-[44px] lg:text-[clamp(40px,3.4vw,64px)] font-bold leading-[1.05] tracking-[-0.04em] max-w-[14ch]">
-                {s.title} <span className="text-black/40">{s.accent}</span>
+                {s.title} <span className="text-black/50">{s.accent}</span>
               </h2>
               <p className="mt-5 md:mt-6 max-w-[40ch] text-base md:text-lg text-black/70 leading-relaxed">{s.body}</p>
               <Link to={s.action.href} tabIndex={step === i + 1 ? undefined : -1} className={`${secondaryButton} mt-7 md:mt-9`}>
@@ -303,7 +303,7 @@ export const Hero = () => {
           />
           {live && (
             <div className="absolute bottom-0 inset-x-0 z-10 flex flex-wrap items-center justify-center lg:justify-between gap-2 gap-x-4">
-              <p className="hidden sm:flex items-center gap-2 text-sm text-black/50">
+              <p className="hidden sm:flex items-center gap-2 text-sm text-black/60">
                 <span className="w-1.5 h-1.5 rounded-full bg-black" aria-hidden="true" />{hero.pager.hint}
               </p>
               <div className="flex items-center gap-1">
@@ -315,7 +315,7 @@ export const Hero = () => {
                     aria-label={`${hero.pager.spread} 0${i + 1}`}
                     aria-current={book.open && book.spread === i ? "true" : undefined}
                     onClick={() => goToSpread(i)}
-                    className="group inline-grid place-items-center min-w-[44px] min-h-[44px] text-[13px] font-semibold tracking-wider text-black/40 aria-[current=true]:text-black"
+                    className="group inline-grid place-items-center min-w-[44px] min-h-[44px] text-[13px] font-semibold tracking-wider text-black/60 aria-[current=true]:text-black"
                   >
                     <span className="block h-0.5 w-7 mb-1 rounded bg-black/15 group-aria-[current=true]:bg-black transition-colors" />0{i + 1}
                   </button>
