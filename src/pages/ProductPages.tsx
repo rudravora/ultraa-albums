@@ -55,72 +55,82 @@ export const ProductsPage = () => (
   </PageShell>
 );
 
-export const ProductPage = ({ product }: { product: Product }) => {
-  const others = products.filter((p) => p.path !== product.path);
-  return (
-    <PageShell breadcrumbs={[{ name: "Our Products", path: "/our-products" }, { name: product.name }]}>
-      <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-10 lg:gap-20 items-start mb-16">
-        <div className="flex flex-col gap-6">
-          <h1 className="text-[40px] md:text-[56px] lg:text-[64px] font-normal tracking-[-0.04em] leading-[1.05]">{product.name}</h1>
-          <p className="text-[17px] md:text-[19px] leading-[1.6] text-black/75">{product.summary}</p>
-          <div className="flex flex-wrap gap-3">
-            <Link to="/contact-us" className={primaryButton}>Start your album <ArrowIcon size={14} /></Link>
-            <WhatsAppButton />
-          </div>
+type DetailItem = Pick<Product, "path" | "name" | "summary" | "image" | "alt" | "sections"> & { covers?: boolean };
+
+/** Parmar ServiceDetailPage layout, shared by products, services and the wedding album guide. */
+export const DetailPage = ({
+  item,
+  parent,
+  others,
+  othersTitle,
+}: {
+  item: DetailItem;
+  parent?: { name: string; path: string };
+  others: { name: string; path: string }[];
+  othersTitle: string;
+}) => (
+  <PageShell breadcrumbs={[...(parent ? [parent] : []), { name: item.name }]}>
+    <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-10 lg:gap-20 items-start mb-16">
+      <div className="flex flex-col gap-6">
+        <h1 className="text-[40px] md:text-[56px] lg:text-[64px] font-normal tracking-[-0.04em] leading-[1.05]">{item.name}</h1>
+        <p className="text-[17px] md:text-[19px] leading-[1.6] text-black/75">{item.summary}</p>
+        <div className="flex flex-wrap gap-3">
+          <Link to="/contact-us" className={primaryButton}>Start your album <ArrowIcon size={14} /></Link>
+          <WhatsAppButton />
         </div>
-        <img
-          src={product.image.src}
-          srcSet={product.image.srcSet}
-          sizes="(min-width: 1024px) 45vw, 100vw"
-          alt={product.alt}
-          fetchPriority="high"
-          className="w-full aspect-[4/3] object-cover"
-        />
       </div>
+      <img src={item.image.src} srcSet={item.image.srcSet} sizes="(min-width: 1024px) 45vw, 100vw" alt={item.alt} fetchPriority="high" className="w-full aspect-[4/3] object-cover" />
+    </div>
 
-      <div className="max-w-[900px] flex flex-col gap-12">
-        {product.sections.map((section) => (
-          <section key={section.question} className="flex flex-col gap-4 pb-10 border-b border-black/10">
-            <h2 className="text-[26px] md:text-[32px] tracking-[-0.03em]">{section.question}</h2>
-            {section.answer.map((para) => (
-              <p key={para} className="text-[15px] md:text-[17px] leading-[1.7] text-black/80">{para}</p>
-            ))}
-            {section.bullets && (
-              <ul className="list-disc pl-5 flex flex-col gap-2 text-[15px] md:text-[17px] leading-[1.6] text-black/80">
-                {section.bullets.map((b) => <li key={b}>{b}</li>)}
-              </ul>
-            )}
-          </section>
-        ))}
-
-        {product.covers && (
-          <section className="flex flex-col gap-6 pb-10 border-b border-black/10">
-            <div className="flex flex-col gap-4">
-              <h2 className="text-[26px] md:text-[32px] tracking-[-0.03em]">{coverPads.question}</h2>
-              <p className="text-[15px] md:text-[17px] leading-[1.7] text-black/80">{coverPads.intro}</p>
-            </div>
-            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-black/10 border border-black/10">
-              {coverPads.items.map((pad) => (
-                <div key={pad.name} className="bg-[#f3f1ed] p-6 flex flex-col gap-2">
-                  <dt className="text-[17px] md:text-[19px] font-semibold">{pad.name}</dt>
-                  <dd className="text-[15px] leading-[1.7] text-black/70">{pad.text}</dd>
-                </div>
-              ))}
-            </dl>
-          </section>
-        )}
-
-        <section className="flex flex-col gap-4">
-          <h2 className="text-[22px] md:text-[26px] tracking-[-0.03em]">Other products</h2>
-          <ul className="flex flex-wrap gap-3">
-            {others.map((p) => (
-              <li key={p.path}>
-                <Link to={p.path} className={secondaryButton}>{p.name}</Link>
-              </li>
-            ))}
-          </ul>
+    <div className="max-w-[900px] flex flex-col gap-12">
+      {item.sections.map((section) => (
+        <section key={section.question} className="flex flex-col gap-4 pb-10 border-b border-black/10">
+          <h2 className="text-[26px] md:text-[32px] tracking-[-0.03em]">{section.question}</h2>
+          {section.answer.map((para) => (
+            <p key={para} className="text-[15px] md:text-[17px] leading-[1.7] text-black/80">{para}</p>
+          ))}
+          {section.bullets && (
+            <ul className="list-disc pl-5 flex flex-col gap-2 text-[15px] md:text-[17px] leading-[1.6] text-black/80">
+              {section.bullets.map((b) => <li key={b}>{b}</li>)}
+            </ul>
+          )}
+          {section.link && (
+            <Link to={section.link.href} className={`${secondaryButton} w-fit mt-2`}>{section.link.label} <ArrowIcon size={14} /></Link>
+          )}
         </section>
-      </div>
-    </PageShell>
-  );
-};
+      ))}
+
+      {item.covers && (
+        <section className="flex flex-col gap-6 pb-10 border-b border-black/10">
+          <div className="flex flex-col gap-4">
+            <h2 className="text-[26px] md:text-[32px] tracking-[-0.03em]">{coverPads.question}</h2>
+            <p className="text-[15px] md:text-[17px] leading-[1.7] text-black/80">{coverPads.intro}</p>
+          </div>
+          <dl className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-black/10 border border-black/10">
+            {coverPads.items.map((pad) => (
+              <div key={pad.name} className="bg-[#f3f1ed] p-6 flex flex-col gap-2">
+                <dt className="text-[17px] md:text-[19px] font-semibold">{pad.name}</dt>
+                <dd className="text-[15px] leading-[1.7] text-black/70">{pad.text}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      )}
+
+      <section className="flex flex-col gap-4">
+        <h2 className="text-[22px] md:text-[26px] tracking-[-0.03em]">{othersTitle}</h2>
+        <ul className="flex flex-wrap gap-3">
+          {others.filter((o) => o.path !== item.path).map((o) => (
+            <li key={o.path}>
+              <Link to={o.path} className={secondaryButton}>{o.name}</Link>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
+  </PageShell>
+);
+
+export const ProductPage = ({ product }: { product: Product }) => (
+  <DetailPage item={product} parent={{ name: "Our Products", path: "/our-products" }} others={products} othersTitle="Other products" />
+);

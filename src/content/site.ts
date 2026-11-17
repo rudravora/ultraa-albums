@@ -49,7 +49,6 @@ export const navigation: { links: NavLink[]; cta: { label: string; href: string 
     { label: "About", href: "/about-us" },
     { label: "Products", href: "/our-products", items: [{ label: "All products", href: "/our-products" }, ...products] },
     { label: "Services", href: "/album-designing", items: services },
-    { label: "Blog", href: "/blogs" },
     { label: "Contact", href: "/contact-us" },
   ],
   cta: { label: "Start your album", href: "/contact-us" },
@@ -65,7 +64,6 @@ export const footer = {
     { label: "Wedding Photography", href: "/photography" },
     { label: "Wedding Photo Albums", href: "/wedding-photo-albums" },
     { label: "FAQ", href: "/faq" },
-    { label: "Blog", href: "/blogs" },
     { label: "Contact", href: "/contact-us" },
   ],
   legal: [

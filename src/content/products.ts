@@ -3,9 +3,9 @@
 // headings are questions, as on the Parmar service pages. Photos are Unsplash
 // stand-ins (credited in the README).
 
-const stock = (name: string) => ({ src: `/assets/images/stock/${name}-1200.webp`, srcSet: `/assets/images/stock/${name}-800.webp 800w, /assets/images/stock/${name}-1200.webp 1200w` });
+export const stock = (name: string) => ({ src: `/assets/images/stock/${name}-1200.webp`, srcSet: `/assets/images/stock/${name}-800.webp 800w, /assets/images/stock/${name}-1200.webp 1200w` });
 
-export type ProductSection = { question: string; answer: string[]; bullets?: string[] };
+export type ProductSection = { question: string; answer: string[]; bullets?: string[]; link?: { label: string; href: string } };
 export type Product = {
   path: string;
   name: string;

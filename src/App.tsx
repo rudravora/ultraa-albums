@@ -2,9 +2,11 @@ import { useEffect } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import { FloatingButtons } from "@/components/ui";
 import { HomePage } from "@/pages/HomePage";
-import { NotFoundPage, StubPage } from "@/pages/StubPage";
-import { ProductPage, ProductsPage } from "@/pages/ProductPages";
+import { NotFoundPage } from "@/pages/NotFoundPage";
+import { DetailPage, ProductPage, ProductsPage } from "@/pages/ProductPages";
+import { AboutPage, BlogPage, ContactPage, FaqPage, PrivacyPage, TermsPage } from "@/pages/InfoPages";
 import { productFor } from "@/content/products";
+import { serviceFor, services, weddingGuide } from "@/content/services";
 import { pageFor, pages } from "@/content/site";
 
 /** Title, description and scroll position follow the route on client-side navigation. */
@@ -19,12 +21,26 @@ const RouteEffects = () => {
   return null;
 };
 
+const infoPages: Record<string, () => JSX.Element> = {
+  "/about-us": AboutPage,
+  "/contact-us": ContactPage,
+  "/faq": FaqPage,
+  "/blogs": BlogPage,
+  "/privacy-policy": PrivacyPage,
+  "/terms-and-condition": TermsPage,
+};
+
 const elementFor = (page: (typeof pages)[number]) => {
   if (page.kind === "home") return <HomePage />;
   if (page.path === "/our-products") return <ProductsPage />;
   const product = productFor(page.path);
   if (product) return <ProductPage product={product} />;
-  return <StubPage page={page} />;
+  const service = serviceFor(page.path);
+  if (service) return <DetailPage item={service} others={services} othersTitle="Other services" />;
+  if (page.path === weddingGuide.path) return <DetailPage item={weddingGuide} others={services} othersTitle="Design, editing and photography" />;
+  const Info = infoPages[page.path];
+  if (Info) return <Info />;
+  throw new Error(`No page component for ${page.path}`);
 };
 
 /** The route tree, shared by the browser app and the build-time prerender. */
