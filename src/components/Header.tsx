@@ -137,7 +137,7 @@ export const Header = () => {
     <>
       <TopBar />
       <header
-        className={`fixed top-9 inset-x-0 z-[100] transition-colors duration-500 ${solid ? "bg-white/95 backdrop-blur-md shadow-sm" : "bg-[#f8f7f4]"}`}
+        className={`fixed top-9 inset-x-0 z-[100] transition-colors duration-500 ${solid ? "bg-white shadow-sm" : "bg-[#f8f7f4]"}`}
       >
         <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 md:px-10 lg:px-16">
           <div className="flex justify-between items-center min-h-[64px] md:min-h-[75px] text-neutral-900">

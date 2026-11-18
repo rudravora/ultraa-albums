@@ -49,7 +49,10 @@ export const Hero = () => {
 
   const sync = () => {
     const c = ctrl.current;
-    if (c) setBook({ open: c.opened > 0.5, spread: Math.round(c.spread) });
+    if (!c) return;
+    const open = c.opened > 0.5;
+    const spread = Math.round(c.spread);
+    setBook((b) => (b.open === open && b.spread === spread ? b : { open, spread }));
   };
 
   const progress = () => {

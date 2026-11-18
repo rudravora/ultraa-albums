@@ -320,7 +320,9 @@ export async function openAlbumScene(canvas, spreads, { reducedMotion = false, o
 
   const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'low-power' });
   renderer.setClearColor(0x000000, 0);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  // Phones get 1.5x: at their size it looks the same and costs about half the pixels of 2x.
+  const maxRatio = window.matchMedia('(pointer: coarse)').matches ? 1.5 : 2;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, maxRatio));
   renderer.outputColorSpace = SRGBColorSpace;
   renderer.toneMapping = NoToneMapping;
   renderer.shadowMap.enabled = true;

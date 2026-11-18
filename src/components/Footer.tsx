@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { Link } from "react-router-dom";
 import { footer, site } from "@/content/site";
@@ -6,26 +6,34 @@ import { footer, site } from "@/content/site";
 /** Black footer with the giant wordmark and a gentle parallax (Parmar layout). */
 export const Footer = () => {
   const ref = useRef<HTMLElement>(null);
-  const [offset, setOffset] = useState(0);
+  const inner = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const onScroll = () => {
-      const rect = ref.current?.getBoundingClientRect();
-      if (!rect || rect.top >= window.innerHeight || rect.bottom <= 0) return;
+    const el = ref.current;
+    if (!el) return;
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const rect = el.getBoundingClientRect();
       const progress = Math.max(0, Math.min(1, (window.innerHeight - rect.top) / (window.innerHeight + rect.height)));
-      setOffset((1 - progress) * 40);
+      if (inner.current) inner.current.style.transform = `translateY(${((1 - progress) * 40).toFixed(1)}px)`;
     };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    const onScroll = () => { if (!frame) frame = requestAnimationFrame(update); };
+    // Listen to scroll only while the footer is on screen.
+    const io = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) { update(); window.addEventListener("scroll", onScroll, { passive: true }); }
+      else window.removeEventListener("scroll", onScroll);
+    });
+    io.observe(el);
+    return () => { io.disconnect(); window.removeEventListener("scroll", onScroll); cancelAnimationFrame(frame); };
   }, []);
 
   const year = new Date().getFullYear();
 
   return (
     <footer ref={ref} className="relative w-full overflow-hidden bg-[#111111]">
-      <div className="text-white w-full" style={{ transform: `translateY(${offset}px)` }}>
+      <div ref={inner} className="text-white w-full">
         <div className="w-full max-w-[1920px] mx-auto px-6 md:px-16 pt-16 pb-8">
           <div className="flex flex-col lg:flex-row justify-between items-start gap-10 mb-20">
             <div className="flex flex-col w-full">
