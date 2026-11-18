@@ -4,7 +4,8 @@ import { FloatingButtons } from "@/components/ui";
 import { HomePage } from "@/pages/HomePage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import { DetailPage, ProductPage, ProductsPage } from "@/pages/ProductPages";
-import { AboutPage, BlogPage, ContactPage, FaqPage, PrivacyPage, TermsPage } from "@/pages/InfoPages";
+import { AboutPage, ContactPage, FaqPage, PrivacyPage, TermsPage } from "@/pages/InfoPages";
+import { BlogListPage, BlogPostPage } from "@/pages/BlogPages";
 import { productFor } from "@/content/products";
 import { serviceFor, services, weddingGuide } from "@/content/services";
 import { pageFor, pages } from "@/content/site";
@@ -25,13 +26,14 @@ const infoPages: Record<string, () => JSX.Element> = {
   "/about-us": AboutPage,
   "/contact-us": ContactPage,
   "/faq": FaqPage,
-  "/blogs": BlogPage,
+  "/blog": BlogListPage,
   "/privacy-policy": PrivacyPage,
   "/terms-and-condition": TermsPage,
 };
 
 const elementFor = (page: (typeof pages)[number]) => {
   if (page.kind === "home") return <HomePage />;
+  if (page.kind === "post") return <BlogPostPage slug={page.path.slice("/blog/".length)} />;
   if (page.path === "/our-products") return <ProductsPage />;
   const product = productFor(page.path);
   if (product) return <ProductPage product={product} />;

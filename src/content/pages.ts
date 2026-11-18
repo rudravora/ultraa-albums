@@ -90,14 +90,12 @@ export const faqGroups: { heading: string; faqs: { question: string; answer: str
   },
 ];
 
-export const blogPage = {
-  h1: "Blog",
-  intro: "Ultraa has not published any articles yet. In the meantime, these pages answer the most common questions.",
-  links: [
-    { label: "Wedding photo albums", href: "/wedding-photo-albums" },
-    { label: "Our products", href: "/our-products" },
-    { label: "FAQ", href: "/faq" },
-  ],
+export const blogCopy = {
+  h1: "Blog & Resources",
+  intro: "Guides for couples and photographers on choosing, designing and caring for wedding albums.",
+  heading: ["Blog &", "Resources"],
+  subheading: "Album formats, covers, design and care, explained by the team that has made albums in Mumbai since 2012.",
+  cta: "Visit our blog",
 };
 
 // Ultraa's published privacy policy, with its unfilled "[name]" placeholders set to

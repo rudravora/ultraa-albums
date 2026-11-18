@@ -4,6 +4,7 @@ import { StaticRouter } from "react-router-dom/server";
 import { AppRoutes } from "@/App";
 
 export { pages, site } from "@/content/site";
+export { getPosts } from "@/content/blog";
 
 export const render = (path: string) =>
   renderToString(

@@ -32,6 +32,17 @@ npx serve dist  # serves dist/ with clean URLs (/about-us → about-us.html), as
 - `public/assets/images`: WebP images. `album-closed-*` and `album-open-*` are stills rendered from the Three.js scene.
 - Instrument Sans is self-hosted through `@fontsource-variable/instrument-sans`; no font CDN.
 
+## Blog
+
+Posts live in `src/content/blog.json`, one object per post, using the same field names as the Parmar main-site's Supabase `posts` table (`slug`, `title`, `date`, `excerpt`, `image_url`, `category`, `featured`, `status`, `grid_order`, `seo_title`, `seo_description`, `intro`, `sections`), plus `audience` and `read_time`. `intro` and each section's `paragraphs` are Markdown blocks: paragraphs, `-` and `1.` lists, `- [ ]` checklists, tables, `**bold**` and `[links](/path)`.
+
+- A post shows when `status` is `"published"` and `date` is today or earlier; a future-dated post appears on the first build after its date.
+- Featured posts lead the home section, then `grid_order`.
+- Each post is prerendered at `/blog/<slug>` and listed in the sitemap. The build fails if a post's local image is missing.
+- Pages read posts only through `src/content/blog.ts`. When the admin panel arrives, point those functions at its database or API.
+
+The 26 launch posts came from Ultraa's blog content file, with stand-in Unsplash photos.
+
 ## Contact form
 
 With no endpoint configured, the form opens the visitor's email app with the enquiry addressed to ultraaalbums@gmail.com, and says so beside the button. Without JavaScript the same happens through a native `mailto:` form action. The page never shows a success message it cannot confirm.

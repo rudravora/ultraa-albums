@@ -10,7 +10,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const dist = path.join(root, "dist");
-const { render, pages, site } = await import(pathToFileURL(path.join(root, "dist-ssr", "entry-server.js")).href);
+const { render, pages, site, getPosts } = await import(pathToFileURL(path.join(root, "dist-ssr", "entry-server.js")).href);
 
 const template = fs.readFileSync(path.join(dist, "index.html"), "utf8");
 if (!template.includes('<div id="app"></div>')) throw new Error("dist/index.html has no empty #app container");
@@ -26,8 +26,13 @@ function page(route, { title, description }) {
     .replace('<div id="app"></div>', `<div id="app">${render(route ?? "/404")}</div>`);
 }
 
+// Every local image a blog post points at must exist (posts are edited outside the code).
+const missing = getPosts().filter((p) => p.image_url.startsWith("/") && !fs.existsSync(path.join(dist, p.image_url)));
+if (missing.length) throw new Error(`Blog images not found: ${missing.map((p) => `${p.slug} → ${p.image_url}`).join(", ")}`);
+
 for (const p of pages) {
   const file = p.path === "/" ? "index.html" : `${p.path.slice(1)}.html`;
+  fs.mkdirSync(path.dirname(path.join(dist, file)), { recursive: true });
   fs.writeFileSync(path.join(dist, file), page(p.path, p));
   console.log(`[prerender] ${p.path} → ${file}`);
 }

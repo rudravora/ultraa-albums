@@ -22,7 +22,8 @@
     { "source": "/slip-in-albums-for-uk", "destination": "/slip-in-albums", "permanent": true },
     { "source": "/image-editing-for-uk", "destination": "/image-editing", "permanent": true },
     { "source": "/photo-book-for-uk", "destination": "/photo-book", "permanent": true },
-    { "source": "/photography-for-uk", "destination": "/photography", "permanent": true }
+    { "source": "/photography-for-uk", "destination": "/photography", "permanent": true },
+    { "source": "/blogs", "destination": "/blog", "permanent": true }
   ],
   "cleanUrls": true,
   "trailingSlash": false

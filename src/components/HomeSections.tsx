@@ -3,6 +3,7 @@
 import { Link } from "react-router-dom";
 import { about, cta, expertise, identity, marquee, materials, process, services, why } from "@/content/home";
 import { ArrowIcon } from "@/components/ui";
+import { BlogSection } from "@/pages/BlogPages";
 import { Reveal, ScrubText } from "@/components/motion";
 
 const container = "w-full max-w-[1920px] mx-auto px-6 md:px-16";
@@ -298,6 +299,7 @@ export const HomeSections = () => (
     <ServicesSection />
     <MaterialsSection />
     <ExpertiseSection />
+    <BlogSection />
     <CtaSection />
   </>
 );

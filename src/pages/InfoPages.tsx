@@ -3,7 +3,7 @@ import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { ArrowIcon, PageShell, primaryButton, secondaryButton } from "@/components/ui";
 import { Reveal } from "@/components/motion";
-import { aboutPage as about, blogPage, contactPage as contact, faqGroups, privacyPolicy, termsPage } from "@/content/pages";
+import { aboutPage as about, contactPage as contact, faqGroups, privacyPolicy, termsPage } from "@/content/pages";
 import { site } from "@/content/site";
 
 const h1Class = "text-[40px] md:text-[56px] lg:text-[64px] font-normal tracking-[-0.04em] leading-[1.05]";
@@ -242,20 +242,6 @@ export const FaqPage = () => (
         <p className="text-[15px] leading-[1.7] text-black/70">Ask us directly, or browse <Link to="/our-products" className="underline underline-offset-2">our products</Link>.</p>
         <a href={site.whatsapp} target="_blank" rel="noopener noreferrer" className={`${primaryButton} w-fit`}>Ask on WhatsApp <ArrowIcon size={14} /></a>
       </div>
-    </div>
-  </PageShell>
-);
-
-export const BlogPage = () => (
-  <PageShell breadcrumbs={[{ name: "Blog" }]}>
-    <div className="max-w-[900px] flex flex-col gap-8">
-      <h1 className={h1Class}>{blogPage.h1}</h1>
-      <p className={leadClass}>{blogPage.intro}</p>
-      <ul className="flex flex-wrap gap-3">
-        {blogPage.links.map((l) => (
-          <li key={l.href}><Link to={l.href} className={secondaryButton}>{l.label} <ArrowIcon size={14} /></Link></li>
-        ))}
-      </ul>
     </div>
   </PageShell>
 );

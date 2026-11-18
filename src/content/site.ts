@@ -1,5 +1,6 @@
 // Site-wide content: brand, contacts, navigation and the page list.
 // Facts come from ultraaalbums.com (contact-us, about-us); nothing here is invented.
+import { getPosts } from "@/content/blog";
 
 export const site = {
   name: "Ultraa Albums",
@@ -49,6 +50,7 @@ export const navigation: { links: NavLink[]; cta: { label: string; href: string 
     { label: "About", href: "/about-us" },
     { label: "Products", href: "/our-products", items: [{ label: "All products", href: "/our-products" }, ...products] },
     { label: "Services", href: "/album-designing", items: services },
+    { label: "Blog", href: "/blog" },
     { label: "Contact", href: "/contact-us" },
   ],
   cta: { label: "Start your album", href: "/contact-us" },
@@ -63,6 +65,7 @@ export const footer = {
     { label: "Image Editing", href: "/image-editing" },
     { label: "Wedding Photography", href: "/photography" },
     { label: "Wedding Photo Albums", href: "/wedding-photo-albums" },
+    { label: "Blog", href: "/blog" },
     { label: "FAQ", href: "/faq" },
     { label: "Contact", href: "/contact-us" },
   ],
@@ -72,7 +75,7 @@ export const footer = {
   ],
 };
 
-export type PageKind = "home" | "product" | "service" | "info" | "legal";
+export type PageKind = "home" | "product" | "service" | "info" | "legal" | "post";
 
 /** Every public page. Paths match the live ultraaalbums.com URLs. */
 export const pages: { path: string; name: string; title: string; description: string; kind: PageKind }[] = [
@@ -93,9 +96,11 @@ export const pages: { path: string; name: string; title: string; description: st
   { path: "/wedding-photo-albums", name: "Wedding Photo Albums", kind: "info", title: "Wedding Photo Albums and Books | Ultraa Albums", description: "A guide to flush mount, layflat and luxury wedding albums and photo books." },
   { path: "/contact-us", name: "Contact", kind: "info", title: "Contact Us | Ultraa Albums", description: "Call, email or message Ultraa Albums in Dahisar East, Mumbai." },
   { path: "/faq", name: "FAQ", kind: "info", title: "FAQ | Ultraa Albums", description: "Answers to common questions about Ultraa albums, design and shipping." },
-  { path: "/blogs", name: "Blog", kind: "info", title: "Blog | Ultraa Albums", description: "Articles from Ultraa Albums." },
+  { path: "/blog", name: "Blog", kind: "info", title: "Blog & Resources | Ultraa Albums", description: "Guides for couples and photographers on choosing, designing and caring for wedding albums." },
   { path: "/privacy-policy", name: "Privacy Policy", kind: "legal", title: "Privacy Policy | Ultraa Albums", description: "How Ultraa Albums handles your information." },
   { path: "/terms-and-condition", name: "Terms and Conditions", kind: "legal", title: "Terms and Conditions | Ultraa Albums", description: "Terms and conditions for Ultraa Albums orders." },
+  // One page per published blog post, so each gets its own prerendered HTML and sitemap entry.
+  ...getPosts().map((p) => ({ path: p.href, name: p.title, kind: "post" as const, title: `${p.seo_title || p.title} | Ultraa Albums`, description: p.seo_description || p.excerpt })),
 ];
 
 export const pageFor = (path: string) => pages.find((p) => p.path === path);
