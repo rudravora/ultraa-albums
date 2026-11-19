@@ -252,7 +252,7 @@ export const Hero = () => {
                 </button>
               ))}
             </div>
-            <h1 id="hero-title" className="text-[40px] sm:text-[48px] lg:text-[clamp(44px,3.9vw,72px)] font-bold leading-[1.05] tracking-[-0.04em] max-w-[14ch]">
+            <h1 id="hero-title" className="font-serif text-[42px] sm:text-[50px] lg:text-[clamp(46px,4vw,76px)] font-normal leading-[1.04] tracking-[-0.02em] max-w-[14ch]">
               {audience.title} <span className="text-black/50">{audience.accent}</span>
             </h1>
             <p className="mt-5 md:mt-6 max-w-[40ch] text-base md:text-lg text-black/70 leading-relaxed">{audience.sentence}</p>
@@ -265,7 +265,7 @@ export const Hero = () => {
           {hero.steps.map((s, i) => (
             <div key={s.title} aria-hidden={step !== i + 1} className={`[grid-area:1/1] self-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${shown(i + 1)}`}>
               <p className="text-[13px] font-semibold tracking-widest text-black/60 mb-5">0{i + 2}</p>
-              <h2 className="text-[36px] sm:text-[44px] lg:text-[clamp(40px,3.4vw,64px)] font-bold leading-[1.05] tracking-[-0.04em] max-w-[14ch]">
+              <h2 className="font-serif text-[38px] sm:text-[46px] lg:text-[clamp(42px,3.5vw,68px)] font-normal leading-[1.04] tracking-[-0.02em] max-w-[14ch]">
                 {s.title} <span className="text-black/50">{s.accent}</span>
               </h2>
               <p className="mt-5 md:mt-6 max-w-[40ch] text-base md:text-lg text-black/70 leading-relaxed">{s.body}</p>

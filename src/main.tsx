@@ -1,5 +1,6 @@
 import "@fontsource-variable/instrument-sans/wght.css";
 import "@fontsource/bebas-neue/400.css";
+import "@fontsource/dm-serif-display/latin-400.css";
 import "@/styles.css";
 import { StrictMode } from "react";
 import { createRoot, hydrateRoot } from "react-dom/client";

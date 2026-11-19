@@ -14,6 +14,9 @@ importers:
       '@fontsource/bebas-neue':
         specifier: 5.2.5
         version: 5.2.5
+      '@fontsource/dm-serif-display':
+        specifier: 5.1.1
+        version: 5.1.1
       lucide-react:
         specifier: 0.453.0
         version: 0.453.0(react@18.3.1)
@@ -299,6 +302,9 @@ packages:
 
   '@fontsource/bebas-neue@5.2.5':
     resolution: {integrity: sha512-9hZCl9BpuwrIPRgprS17WRHMRyqprFKxNEDOl98en9XzikR8GGXpeiLaKf5HpNm1NKnVo/EowTjcgcgrvW3h0w==}
+
+  '@fontsource/dm-serif-display@5.1.1':
+    resolution: {integrity: sha512-LpabYb8YSDO7OCexP8tTooF3JdGeheWQWeBjlpkBZb2juEPjRWpv1yU/b9sWHBexkue145llA+fK6DLq9WFQLg==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -1163,6 +1169,8 @@ snapshots:
   '@fontsource-variable/instrument-sans@5.3.0': {}
 
   '@fontsource/bebas-neue@5.2.5': {}
+
+  '@fontsource/dm-serif-display@5.1.1': {}
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
